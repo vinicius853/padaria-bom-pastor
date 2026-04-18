@@ -434,6 +434,10 @@ function validarHorarioFuncionamento() {
   return horariosDisponiveis.includes(horario);
 }
 
+/*
+  Monta os itens com quebra real de linha.
+  Aqui está o principal ajuste para o WhatsApp não mostrar "\\n" literal.
+*/
 function montarTextoPedido() {
   return pedido
     .map(item => `• ${item.quantidade} ${item.unidadeLabel} de ${item.nome.toLowerCase()} - ${formatarMoeda(item.subtotal)}`)
@@ -444,6 +448,10 @@ function calcularTotalGeral() {
   return pedido.reduce((acc, item) => acc + item.subtotal, 0);
 }
 
+/*
+  Monta a mensagem final usando array + join("\\n").
+  Isso deixa a formatação consistente e evita o texto ficar "colado".
+*/
 function montarMensagemFinal() {
   if (pedido.length === 0) {
     return "Adicione produtos ao pedido para visualizar a mensagem final.";
@@ -458,27 +466,28 @@ function montarMensagemFinal() {
   const total = formatarMoeda(calcularTotalGeral());
   const observacoes = observacoesPedido?.value.trim() || "";
 
-  let mensagem = `Olá, gostaria de confirmar meu pedido:
-
-data: ${data} - ${diaSemana}
-horario: ${horario} horas
-
-pedido:
-${itens}
-
-total: ${total}
-
-nome: ${nome}
-telefone: ${telefone}`;
+  const linhas = [
+    "Olá, gostaria de confirmar meu pedido:",
+    "",
+    `data: ${data} - ${diaSemana}`,
+    `horario: ${horario} horas`,
+    "",
+    "pedido:",
+    itens,
+    "",
+    `total: ${total}`,
+    "",
+    `nome: ${nome}`,
+    `telefone: ${telefone}`
+  ];
 
   if (observacoes) {
-    mensagem += `
-
-observações:
-${observacoes}`;
+    linhas.push("");
+    linhas.push("observações:");
+    linhas.push(observacoes);
   }
 
-  return mensagem;
+  return linhas.join("\n");
 }
 
 function atualizarPreviewMensagem() {
@@ -521,7 +530,7 @@ function validarFormularioFinal() {
     return false;
   }
 
-  const telefoneNumeros = telefoneCliente.value.replace(/\\D/g, "");
+  const telefoneNumeros = telefoneCliente.value.replace(/\D/g, "");
   if (telefoneNumeros.length < 10) {
     mostrarErro("Informe um telefone válido com DDD.");
     return false;
