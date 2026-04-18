@@ -436,8 +436,8 @@ function validarHorarioFuncionamento() {
 
 function montarTextoPedido() {
   return pedido
-    .map(item => `${item.quantidade} ${item.unidadeLabel} de ${item.nome.toLowerCase()} - ${formatarMoeda(item.subtotal)}`)
-    .join("\\n");
+    .map(item => `• ${item.quantidade} ${item.unidadeLabel} de ${item.nome.toLowerCase()} - ${formatarMoeda(item.subtotal)}`)
+    .join("\n");
 }
 
 function calcularTotalGeral() {
