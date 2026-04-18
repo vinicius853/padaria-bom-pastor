@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Padaria Bom Pastor - Encomendas</title>
+  <meta
+    name="description"
+    content="Sistema de encomendas da Padaria e Confeitaria Bom Pastor. Faça seu pedido e finalize pelo WhatsApp."
+  />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!--
+    ESTRUTURA GERAL:
+    - topo com a identidade visual da padaria
+    - lista de produtos
+    - resumo do pedido
+    - formulário final
+    - prévia da mensagem do WhatsApp
+  -->
+
+  <div class="app-shell">
+    <header class="hero">
+      <div class="hero__overlay"></div>
+
+      <div class="hero__content">
+        <img
+          src="logo-padaria-bom-pastor.jpeg"
+          alt="Logo da Padaria e Confeitaria Bom Pastor"
+          class="hero__logo"
+        />
+
+        <div class="hero__textos">
+          <span class="hero__badge">Encomendas online</span>
+          <h1>Padaria e Confeitaria Bom Pastor</h1>
+          <p>
+            Escolha os produtos, monte seu pedido e finalize pelo WhatsApp de forma rápida e organizada.
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-container">
+      <!-- LISTA DE PRODUTOS -->
+      <section class="painel painel--produtos">
+        <div class="painel__cabecalho">
+          <h2>Monte sua encomenda</h2>
+          <p>
+            Adicione quantos itens desejar. O sistema calcula automaticamente os subtotais e o total do pedido.
+          </p>
+        </div>
+
+        <div class="produtos-grid" id="produtosGrid"></div>
+      </section>
+
+      <!-- COLUNA DIREITA -->
+      <aside class="sidebar">
+        <!-- RESUMO DO PEDIDO -->
+        <section class="painel">
+          <div class="painel__cabecalho">
+            <h2>Seu pedido</h2>
+            <p>Confira os itens adicionados antes de finalizar.</p>
+          </div>
+
+          <div class="pedido-box">
+            <ul class="pedido-lista" id="pedidoLista"></ul>
+
+            <div class="pedido-vazio" id="pedidoVazio">
+              Seu pedido ainda está vazio. Adicione os produtos desejados.
+            </div>
+
+            <div class="totais">
+              <div class="linha-total">
+                <span>Quantidade total</span>
+                <span id="quantidadeItens">0</span>
+              </div>
+
+              <div class="linha-total linha-total--principal">
+                <span>Total do pedido</span>
+                <span id="totalPedido">R$ 0,00</span>
+              </div>
+            </div>
+
+            <button class="btn btn-limpar" id="btnLimparPedido" type="button">
+              Limpar pedido
+            </button>
+          </div>
+        </section>
+
+        <!-- FORMULÁRIO -->
+        <section class="painel">
+          <div class="painel__cabecalho">
+            <h2>Dados para retirada</h2>
+            <p>Preencha os dados abaixo para concluir sua encomenda.</p>
+          </div>
+
+          <div class="formulario">
+            <div class="campo">
+              <label for="nomeCliente">Nome</label>
+              <input type="text" id="nomeCliente" placeholder="Digite seu nome completo" />
+            </div>
+
+            <div class="campo">
+              <label for="telefoneCliente">Telefone</label>
+              <input type="text" id="telefoneCliente" placeholder="(24) 99999-9999" maxlength="15" />
+            </div>
+
+            <div class="campo">
+              <label for="dataRetirada">Data da retirada</label>
+              <input type="date" id="dataRetirada" />
+            </div>
+
+            <div class="campo">
+              <label for="horarioRetirada">Horário da retirada</label>
+              <select id="horarioRetirada">
+                <option value="">Selecione primeiro a data</option>
+              </select>
+            </div>
+
+            <div class="campo">
+              <label for="observacoesPedido">Observações do pedido</label>
+              <textarea
+                id="observacoesPedido"
+                rows="4"
+                placeholder="Ex.: retirar no balcão, produto bem assado, sem pressa, etc."
+              ></textarea>
+            </div>
+
+            <div class="aviso-horario">
+              <strong>Horários para encomendas:</strong><br />
+              Segunda a sábado: 06:00 às 21:00<br />
+              Domingo: 06:00 às 12:00<br /><br />
+
+              <strong>Importante:</strong><br />
+              Mini pão de sal e pudim exigem antecedência mínima de 24 horas.
+            </div>
+
+            <button class="btn btn-finalizar" id="btnFinalizar" type="button">
+              Finalizar pedido no WhatsApp
+            </button>
+
+            <div class="mensagem-status" id="mensagemStatus"></div>
+          </div>
+
+          <div class="preview-box">
+            <h3>Prévia da mensagem</h3>
+            <div class="preview-texto" id="previewMensagem">
+              Adicione produtos ao pedido para visualizar a mensagem final.
+            </div>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
