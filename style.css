@@ -8,6 +8,7 @@
   ║  - sem corte lateral                                          ║
   ║  - preço não quebra linha                                     ║
   ║  - barra inferior com espaço correto                          ║
+  ║  - controles abaixo do preço                                  ║
   ╚═══════════════════════════════════════════════════════════════╝
 */
 
@@ -540,10 +541,17 @@ img { display: block; max-width: 100%; }
   line-height: 1;
 }
 
+/* NOVO: ações abaixo do preço */
+.card__acoes {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .controle {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 6px;
   flex-shrink: 0;
 }
 
@@ -582,9 +590,9 @@ img { display: block; max-width: 100%; }
 }
 
 .controle__num {
-  min-width: 40px;
+  min-width: 32px;
   text-align: center;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 800;
   color: var(--marrom);
 }
@@ -1231,6 +1239,10 @@ img { display: block; max-width: 100%; }
     padding: 12px;
   }
 
+  .card__acoes {
+    margin-top: 8px;
+  }
+
   .controle__btn {
     width: 30px;
     height: 30px;
@@ -1290,6 +1302,10 @@ img { display: block; max-width: 100%; }
 
   .card__rodape {
     gap: 6px;
+  }
+
+  .card__acoes {
+    margin-top: 8px;
   }
 
   .controle__btn {
