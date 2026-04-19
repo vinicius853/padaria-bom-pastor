@@ -3,157 +3,318 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Padaria Bom Pastor - Encomendas</title>
-  <meta
-    name="description"
-    content="Sistema de encomendas da Padaria e Confeitaria Bom Pastor. Faça seu pedido e finalize pelo WhatsApp."
-  />
+
+  <!--
+    ╔══════════════════════════════════════════════════════════╗
+    ║  TÍTULO DA ABA DO NAVEGADOR E DESCRIÇÃO PARA O GOOGLE   ║
+    ║  → Altere o <title> para mudar o nome na aba            ║
+    ║  → Altere o content de description para o Google        ║
+    ╚══════════════════════════════════════════════════════════╝
+  -->
+  <title>Padaria Bom Pastor – Encomendas </title>
+  <meta name="description" content="Encomende pães, bolos e doces artesanais na Padaria e Confeitaria Bom Pastor. Desde 2004. Finalize pelo WhatsApp!" />
+
+  <!-- Fontes: Oswald para títulos pesados + Nunito para texto legível -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Folha de estilos externa (style.css) -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
   <!--
-    ESTRUTURA GERAL:
-    - topo com a identidade visual da padaria
-    - lista de produtos
-    - resumo do pedido
-    - formulário final
-    - prévia da mensagem do WhatsApp
+    ════════════════════════════════════════════════════════════
+    HEADER — barra superior fixa que acompanha o scroll
+    → Para trocar a logo: substitua o arquivo "logo.jpeg"
+      na mesma pasta, mantendo o mesmo nome
+    → Ou altere o src="logo.jpeg" para outro caminho/nome
+    ════════════════════════════════════════════════════════════
   -->
+  <header class="header" id="header">
+    <div class="header__inner">
 
-  <div class="app-shell">
-    <header class="hero">
-      <div class="hero__overlay"></div>
+      <!-- Logo + nome da marca -->
+      <a href="#" class="header__brand">
+        <img src="logo.jpeg" alt="Padaria Bom Pastor" class="header__logo" />
+        <div class="header__brand-texts">
+          <span class="header__brand-name">Bom Pastor</span>
+          <span class="header__brand-sub">Padaria &amp; Confeitaria</span>
+        </div>
+      </a>
 
-      <div class="hero__content">
-        <img
-          src="logo-padaria-bom-pastor.jpeg"
-          alt="Logo da Padaria e Confeitaria Bom Pastor"
-          class="hero__logo"
-        />
+      <!-- Botão carrinho — o badge (#headerBadge) é atualizado pelo JS -->
+      <button class="btn-header-cart" onclick="abrirCarrinho()">
+        🛒 <span class="btn-header-cart__txt">Pedido</span>
+        <span class="badge" id="headerBadge">0</span>
+      </button>
 
-        <div class="hero__textos">
-          <span class="hero__badge">Encomendas online</span>
-          <h1>Padaria e Confeitaria Bom Pastor</h1>
-          <p>
-            Escolha os produtos, monte seu pedido e finalize pelo WhatsApp de forma rápida e organizada.
-          </p>
+    </div>
+  </header>
+
+
+  <!--
+    ════════════════════════════════════════════════════════════
+    HERO — seção de destaque / banner principal
+    → Altere o título (<h1>), subtítulo (<p>) e chips de horário
+    → O fundo escuro vem do CSS (.hero) — gradiente marrom/dourado
+    ════════════════════════════════════════════════════════════
+  -->
+  <section class="hero">
+    <!-- Logo grande centralizada no hero -->
+    <img src="logo.jpeg" alt="Padaria Bom Pastor" class="hero__logo" />
+
+    <!-- Etiqueta de destaque acima do título -->
+    <div class="hero__badge">Produção artesanal desde 2004.</div>
+
+    <!-- Título principal — <span> recebe cor dourada via CSS -->
+    <h1 class="hero__title">
+       <span>Encomende</span><br />com quem entende de qualidade
+    </h1>
+
+    <!-- Subtítulo / slogan -->
+    <p class="hero__desc">
+      Pães fresquinhos, bolos irresistíveis e doces artesanais.<br />
+      Escolha e finalize direto no WhatsApp com atendimento rápido!
+    </p>
+
+    <!--
+      Chips de informação rápida
+      → Cada .info-chip é um cartão pequeno com ícone + texto
+      → Para adicionar mais: copie um bloco <div class="info-chip"> e edite
+    -->
+    <div class="hero__chips">
+      <div class="info-chip">
+        <span>🕐</span>
+        <div><strong>Seg – Sáb</strong><em>06h às 21h</em></div>
+      </div>
+      <div class="info-chip">
+        <span>☀️</span>
+        <div><strong>Domingo</strong><em>06h às 12h</em></div>
+      </div>
+      <div class="info-chip info-chip--alerta">
+        <span>⚠️</span>
+        <div><strong>Mini pão &amp; pudim</strong><em>24h antecedência</em></div>
+      </div>
+      <div class="info-chip info-chip--pickup">
+        <span>📍</span>
+        <div><strong>Retirada no local</strong><em>Sem entregas</em></div>
+      </div>
+    </div>
+
+    <!-- Botão que rola a página até os produtos (#produtos) -->
+    <a href="#produtos" class="btn-cta">Ver cardápio completo ↓</a>
+  </section>
+
+
+  <!--
+    ════════════════════════════════════════════════════════════
+    FILTRO DE CATEGORIAS
+    → data-cat="todos|paes|bolos|doces" deve bater com
+      o campo cat: "..." de cada produto em script.js
+    → Para nova categoria: adicione botão aqui + produtos no JS
+    ════════════════════════════════════════════════════════════
+  -->
+  <nav class="cat-nav" id="catNav">
+    <div class="cat-nav__inner">
+      <button class="cat-btn ativa" data-cat="todos">🌟 Todos</button>
+      <button class="cat-btn" data-cat="paes">🍞 Pães</button>
+      <button class="cat-btn" data-cat="bolos">🎂 Bolos</button>
+      <button class="cat-btn" data-cat="doces">🍮 Doces</button>
+    </div>
+  </nav>
+
+
+  <!--
+    ════════════════════════════════════════════════════════════
+    ÁREA DE PRODUTOS — o conteúdo é injetado pelo script.js
+    → A âncora id="produtos" é usada pelo botão CTA do hero
+    → Para editar produtos: abra script.js e edite o array "produtos"
+    ════════════════════════════════════════════════════════════
+  -->
+  <main class="produtos-wrap" id="produtos">
+    <div id="produtosGrid">
+      <!-- Preenchido automaticamente pelo JS -->
+    </div>
+  </main>
+
+
+  <!--
+    ════════════════════════════════════════════════════════════
+    RODAPÉ
+    → Edite o texto de endereço, telefone e redes sociais aqui
+    ════════════════════════════════════════════════════════════
+  -->
+  <footer class="footer">
+    <img src="logo.jpeg" alt="Padaria Bom Pastor" class="footer__logo" />
+    <p class="footer__nome">Padaria &amp; Confeitaria Bom Pastor</p>
+    <p class="footer__tagline">Feito com amor e tradição desde 2004</p>
+    <div class="footer__divider"></div>
+    <p class="footer__copy">© 2026 Padaria Bom Pastor · Retirada no local · Não fazemos entregas</p>
+  </footer>
+
+
+  <!--
+    ════════════════════════════════════════════════════════════
+    OVERLAY — véu escuro ao fundo quando carrinho está aberto
+    → Clicar nele chama fecharCarrinho() e fecha o painel
+    ════════════════════════════════════════════════════════════
+  -->
+  <div class="overlay" id="overlay" onclick="fecharCarrinho()"></div>
+
+
+  <!--
+    ════════════════════════════════════════════════════════════
+    CARRINHO LATERAL (drawer)
+    → Abre deslizando da direita
+    → #cartBody é preenchido pelo JS (atualizarUI)
+    → #cartFooter aparece só quando há itens
+    ════════════════════════════════════════════════════════════
+  -->
+  <aside class="cart-panel" id="cartPanel">
+
+    <div class="cart-panel__head">
+      <h2 class="cart-panel__title">🛒 Meu Pedido</h2>
+      <button class="cart-panel__close" onclick="fecharCarrinho()">✕</button>
+    </div>
+
+    <!-- Lista de itens gerada pelo JS -->
+    <div class="cart-panel__body" id="cartBody">
+      <!-- Estado vazio padrão -->
+      <div class="cart-vazio">
+        <span class="cart-vazio__emoji">🥐</span>
+        <p>Seu pedido está vazio</p>
+        <small>Adicione produtos e finalize pelo WhatsApp!</small>
+      </div>
+    </div>
+
+    <!-- Rodapé do carrinho: total + botão finalizar -->
+    <div class="cart-panel__foot" id="cartFooter" style="display:none">
+      <div class="cart-total">
+        <span>Total</span>
+        <strong id="cartTotal">R$ 0,00</strong>
+      </div>
+      <button class="btn-finalizar-cart" onclick="abrirModal()">
+        Finalizar pedido 💬
+      </button>
+    </div>
+
+  </aside>
+
+
+  <!--
+    ════════════════════════════════════════════════════════════
+    MODAL DE FINALIZAÇÃO — formulário de dados do cliente
+    → Abre ao clicar "Finalizar pedido" no carrinho
+    → Clicar fora do .modal (no .modal-bg) fecha o modal
+    ════════════════════════════════════════════════════════════
+  -->
+  <div class="modal-bg" id="modalBg" onclick="fecharModalFora(event)">
+    <div class="modal">
+
+      <!-- Alça visual (mobile) -->
+      <div class="modal__alca"></div>
+
+      <!-- Cabeçalho do modal com logo pequena -->
+      <div class="modal__cabecalho">
+        <img src="logo.jpeg" alt="" class="modal__logo" aria-hidden="true" />
+        <div>
+          <h2 class="modal__titulo">Finalizar Encomenda</h2>
+          <p class="modal__subtitulo">Preencha os dados para enviar o pedido</p>
         </div>
       </div>
-    </header>
 
-    <main class="app-container">
-      <!-- LISTA DE PRODUTOS -->
-      <section class="painel painel--produtos">
-        <div class="painel__cabecalho">
-          <h2>Monte sua encomenda</h2>
-          <p>
-            Adicione quantos itens desejar. O sistema calcula automaticamente os subtotais e o total do pedido.
-          </p>
+      <!-- Aviso de sem entrega -->
+      <div class="aviso-sem-entrega">
+        📍 <strong>Retirada no local</strong> — não fazemos entregas
+      </div>
+
+      <!--
+        FORMULÁRIO DO CLIENTE
+        → Os IDs (#inNome, #inTel, #inData, #inHora, #inObs)
+          são lidos pelo JS na função gerarMsg() e enviarWhatsApp()
+        → Não altere os IDs sem também alterar no script.js
+      -->
+      <div class="form-row">
+        <div class="form-grupo">
+          <label for="inNome">Nome completo *</label>
+          <input type="text" id="inNome" placeholder="Seu nome" autocomplete="name" />
         </div>
+        <div class="form-grupo">
+          <label for="inTel">WhatsApp *</label>
+          <input type="tel" id="inTel" placeholder="(24) 99999-9999" maxlength="15" autocomplete="tel" />
+        </div>
+      </div>
 
-        <div class="produtos-grid" id="produtosGrid"></div>
-      </section>
+      <div class="form-row">
+        <div class="form-grupo">
+          <label for="inData">Data de retirada *</label>
+          <input type="date" id="inData" />
+        </div>
+        <div class="form-grupo">
+          <label for="inHora">Horário *</label>
+          <!-- Opções preenchidas pelo JS ao selecionar a data -->
+          <select id="inHora">
+            <option value="">Selecione a data</option>
+          </select>
+        </div>
+      </div>
 
-      <!-- COLUNA DIREITA -->
-      <aside class="sidebar">
-        <!-- RESUMO DO PEDIDO -->
-        <section class="painel">
-          <div class="painel__cabecalho">
-            <h2>Seu pedido</h2>
-            <p>Confira os itens adicionados antes de finalizar.</p>
-          </div>
+      <div class="form-grupo">
+        <label for="inObs">Observações (opcional)</label>
+        <textarea id="inObs" rows="3" placeholder="Ex.: sem glúten, produto bem assado, retirar no balcão..."></textarea>
+      </div>
 
-          <div class="pedido-box">
-            <ul class="pedido-lista" id="pedidoLista"></ul>
+      <!-- Aviso de horários -->
+      <div class="aviso-horarios">
+        <strong>⏰ Atendimento:</strong> Seg–Sáb 06h–21h · Dom 06h–12h<br />
+        <strong>⚠️ Mini pão de sal e pudim:</strong> mínimo 24h de antecedência
+      </div>
 
-            <div class="pedido-vazio" id="pedidoVazio">
-              Seu pedido ainda está vazio. Adicione os produtos desejados.
-            </div>
+     
 
-            <div class="totais">
-              <div class="linha-total">
-                <span>Quantidade total</span>
-                <span id="quantidadeItens">0</span>
-              </div>
+      <!-- Mensagem de erro de validação (preenchida pelo JS) -->
+      <div class="msg-status" id="statusMsg"></div>
 
-              <div class="linha-total linha-total--principal">
-                <span>Total do pedido</span>
-                <span id="totalPedido">R$ 0,00</span>
-              </div>
-            </div>
+      <!-- Botão de envio final para o WhatsApp -->
+      <button class="btn-wpp" onclick="enviarWhatsApp()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+        Enviar pedido pelo WhatsApp
+      </button>
 
-            <button class="btn btn-limpar" id="btnLimparPedido" type="button">
-              Limpar pedido
-            </button>
-          </div>
-        </section>
+    </div><!-- /.modal -->
+  </div><!-- /.modal-bg -->
 
-        <!-- FORMULÁRIO -->
-        <section class="painel">
-          <div class="painel__cabecalho">
-            <h2>Dados para retirada</h2>
-            <p>Preencha os dados abaixo para concluir sua encomenda.</p>
-          </div>
 
-          <div class="formulario">
-            <div class="campo">
-              <label for="nomeCliente">Nome</label>
-              <input type="text" id="nomeCliente" placeholder="Digite seu nome completo" />
-            </div>
-
-            <div class="campo">
-              <label for="telefoneCliente">Telefone</label>
-              <input type="text" id="telefoneCliente" placeholder="(24) 99999-9999" maxlength="15" />
-            </div>
-
-            <div class="campo">
-              <label for="dataRetirada">Data da retirada</label>
-              <input type="date" id="dataRetirada" />
-            </div>
-
-            <div class="campo">
-              <label for="horarioRetirada">Horário da retirada</label>
-              <select id="horarioRetirada">
-                <option value="">Selecione primeiro a data</option>
-              </select>
-            </div>
-
-            <div class="campo">
-              <label for="observacoesPedido">Observações do pedido</label>
-              <textarea
-                id="observacoesPedido"
-                rows="4"
-                placeholder="Ex.: retirar no balcão, produto bem assado, sem pressa, etc."
-              ></textarea>
-            </div>
-
-            <div class="aviso-horario">
-              <strong>Horários para encomendas:</strong><br />
-              Segunda a sábado: 06:00 às 21:00<br />
-              Domingo: 06:00 às 12:00<br /><br />
-
-              <strong>Importante:</strong><br />
-              Mini pão de sal e pudim exigem antecedência mínima de 24 horas.
-            </div>
-
-            <button class="btn btn-finalizar" id="btnFinalizar" type="button">
-              Finalizar pedido no WhatsApp
-            </button>
-
-            <div class="mensagem-status" id="mensagemStatus"></div>
-          </div>
-
-          <div class="preview-box">
-            <h3>Prévia da mensagem</h3>
-            <div class="preview-texto" id="previewMensagem">
-              Adicione produtos ao pedido para visualizar a mensagem final.
-            </div>
-          </div>
-        </section>
-      </aside>
-    </main>
+  <!--
+    ════════════════════════════════════════════════════════════
+    BARRA FLUTUANTE — aparece na parte inferior quando o
+    carrinho tem itens (ótimo para mobile)
+    → Clica em "Ver pedido" → abre o carrinho lateral
+    ════════════════════════════════════════════════════════════
+  -->
+  <div class="float-bar" id="floatBar">
+    <div class="float-bar__info">
+      <span id="fbQtd">0 itens</span>
+      <strong id="fbTotal">R$ 0,00</strong>
+    </div>
+    <button class="float-bar__btn" onclick="abrirCarrinho()">
+      Ver pedido 🛒
+    </button>
   </div>
 
+
+  <!--
+    TOAST — notificação rápida ao adicionar item ao carrinho
+    → Aparece por 1,8 segundos no canto inferior da tela
+  -->
+  <div class="toast" id="toast"></div>
+
+
+  <!-- Script principal (script.js) — sempre por último -->
   <script src="script.js"></script>
+
 </body>
 </html>

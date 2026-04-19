@@ -1,132 +1,211 @@
 /*
-  ==========================================
-  PADARIA BOM PASTOR - SCRIPT.JS
-  ==========================================
-  Este arquivo controla:
-  - cadastro dos produtos
-  - botões de quantidade (+ e -)
-  - carrinho / pedido
-  - máscara do telefone
-  - horários válidos
-  - regra de antecedência de 24h
-  - campo de observações
-  - mensagem final para o WhatsApp
+  ╔═══════════════════════════════════════════════════════════════╗
+  ║           PADARIA BOM PASTOR — script.js                      ║
+  ╠═══════════════════════════════════════════════════════════════╣
+  ║  Este arquivo controla toda a lógica do site:                 ║
+  ║  • Listagem e filtragem de produtos                           ║
+  ║  • Carrinho (adicionar, remover, calcular total)              ║
+  ║  • Modal de checkout com formulário                           ║
+  ║  • Geração da mensagem e envio para o WhatsApp                ║
+  ║  • Horários de atendimento dinâmicos                          ║
+  ╚═══════════════════════════════════════════════════════════════╝
 */
 
-const numeroWhatsApp = "552433266628";
 
+/* ═══════════════════════════════════════════════════════════════
+   ① CONFIGURAÇÃO — altere aqui sem precisar mexer no resto
+   ═══════════════════════════════════════════════════════════════ */
+
+/**
+ * Número do WhatsApp que receberá os pedidos.
+ * Formato: código do país (55) + DDD + número, sem espaços ou símbolos.
+ * → Para mudar: substitua apenas os dígitos dentro das aspas.
+ */
+const WHATSAPP_NUMERO = "552433266628";
+
+/**
+ * CARDÁPIO — lista de produtos disponíveis para encomenda.
+ *
+ * Cada produto é um objeto com os campos:
+ *
+ *   id           → número único; nunca repita (usado como chave interna)
+ *   nome         → texto exibido no card e na mensagem do WhatsApp
+ *   desc         → descrição curta exibida embaixo do nome no card
+ *   preco        → valor em reais (número; use ponto como decimal: 9.50)
+ *   cat          → categoria: "paes" | "bolos" | "doces"
+ *                  → Para nova categoria: adicione aqui e crie botão no index.html
+ *   unid         → unidade de venda: "pacote" | "cento" | "unidade" | "kg"
+ *   antecedencia → (opcional) true = exibe badge "24h" no card
+ *
+ *   ┌─────────────────────────────────────────────────────────┐
+ *   │  FOTO DO PRODUTO — como usar:                           │
+ *   │                                                         │
+ *   │  foto: "fotos/nome-do-arquivo.jpg"                      │
+ *   │    → Coloque a imagem na pasta "fotos/" ao lado do site │
+ *   │    → Formatos aceitos: .jpg .jpeg .png .webp            │
+ *   │    → Tamanho ideal: 400x300px ou maior (16:9 ou 4:3)   │
+ *   │                                                         │
+ *   │  foto: "https://site.com/imagem.jpg"                    │
+ *   │    → Também funciona com link direto de imagem online   │
+ *   │                                                         │
+ *   │  Se NÃO colocar foto (ou deixar foto: ""), o emoji      │
+ *   │  será exibido automaticamente como substituto.          │
+ *   └─────────────────────────────────────────────────────────┘
+ *
+ *   emoji → usado no carrinho lateral e como substituto se não houver foto
+ */
 const produtos = [
+
+  /* ── PÃES ──────────────────────────────────────────────────
+     Para adicionar foto: coloque o arquivo na pasta "fotos/"
+     e preencha: foto: "fotos/nome-do-arquivo.jpg"
+  ─────────────────────────────────────────────────────────── */
   {
     id: 1,
-    nome: "Pão de Cachorro Quente",
-    descricao: "Pacote com 30 pães.",
-    preco: 9.5,
-    unidadeLabel: "pacote(s)",
-    exige24h: false,
-    quantidadeMinima: 1,
-    imagem: "cachorro quente.jpeg",
-    observacao: ""
+    nome: "Pão de Cachorro-Quente",
+    desc: "Pacote com 30 pães. Ideal para festas e lanches.",
+    preco: 9.50,
+    cat: "paes",
+    emoji: "🥖",
+    unid: "pacote",
+    foto: "cachorro.jpeg"
   },
   {
     id: 2,
-    nome: "Pão Hot Dog",
-    descricao: "Pacote com 10 pães.",
-    preco: 9.5,
-    unidadeLabel: "pacote(s)",
-    exige24h: false,
-    quantidadeMinima: 1,
-    imagem: "pao-hotdog.jpeg",
-    observacao: ""
+    nome: "Pão de Hambúrguer",
+    desc: "Pacote com 6 unidades. Macio e saboroso.",
+    preco: 6.00,
+    cat: "paes",
+    emoji: "🍔",
+    unid: "pacote",
+    foto: "hamburguer.jpeg"
   },
   {
     id: 3,
-    nome: "Pão de Hambúrguer",
-    descricao: "Pacote com 6 pães.",
-    preco: 6.0,
-    unidadeLabel: "pacote(s)",
-    exige24h: false,
-    quantidadeMinima: 1,
-    imagem: "pao-hamburguer.jpeg",
-    observacao: ""
+    nome: "Pão Hot Dog",
+    desc: "Pacote com 10 unidades.",
+    preco: 9.50,
+    cat: "paes",
+    emoji: "🌭",
+    unid: "pacote",
+    foto: "hotdog.jpeg"
   },
   {
     id: 4,
-    nome: "Pão de Sal Tradicional",
-    descricao: "R$ 90,00 o cento. Aceita a quantidade desejada pelo cliente.",
-    preco: 0.9,
-    unidadeLabel: "unidade(s)",
-    exige24h: false,
-    quantidadeMinima: 1,
-    imagem: "pao-sal.jpeg",
-    observacao: "Valor calculado por unidade com base em R$ 90,00 o cento."
+    nome: "Mini Pão de Sal",
+    desc: "Venda por cento. Ideal para eventos e cafés. Pedir com 24h de antecedência.",
+    preco: 70.00,
+    cat: "paes",
+    emoji: "🥐",
+    unid: "cento",
+    antecedencia: true,
+    foto: "mini.png"
   },
   {
     id: 5,
-    nome: "Mini Pão de Sal",
-    descricao: "R$ 70,00 o cento. Pedido mínimo de 50 unidades.",
-    preco: 0.7,
-    unidadeLabel: "unidade(s)",
-    exige24h: true,
-    quantidadeMinima: 50,
-    imagem: "mini.png",
-    observacao: "Pedido mínimo de 50 unidades e antecedência mínima de 24 horas."
+    nome: "Pão de Sal Tradicional",
+    desc: "Venda por cento. Fresquinho e crocante.",
+    preco: 90.00,
+    cat: "paes",
+    emoji: "🍞",
+    unid: "cento",
+    foto: "pao-sal.jpeg"
   },
+
+  /* ── BOLOS ──────────────────────────────────────────────── */
   {
     id: 6,
-    nome: "Pudim de Leite Condensado",
-    descricao: "Forma inteira.",
-    preco: 40.0,
-    unidadeLabel: "unidade(s)",
-    exige24h: true,
-    quantidadeMinima: 1,
-    imagem: "pudim.jpeg",
-    observacao: "Antecedência mínima de 24 horas."
+    nome: "torta de limão",
+    desc: "torta inteira sob encomenda. Cobertura cremosa de musse de limão.",
+    preco: 100.00,
+    cat: "bolos",
+    emoji: "🎂",
+    unid: "unidade",
+    foto: "torta.jpeg"
+  },
+
+  /* ── DOCES ──────────────────────────────────────────────── */
+  {
+    id: 8,
+    nome: "Pudim de leite condensado",
+    desc: "Pudim inteiro sob encomenda. Pedir com 24h de antecedência.",
+    preco: 40.00,
+    cat: "doces",
+    emoji: "🍮",
+    unid: "unidade",
+    antecedencia: true,
+    foto: "pudim.jpeg"
   },
   {
-    id: 7,
-    nome: "Rosca Salgada Recheada",
-    descricao: "Rosca salgada recheada.",
-    preco: 18.0,
-    unidadeLabel: "unidade(s)",
-    exige24h: true,
-    quantidadeMinima: 1,
-    imagem: "rosca.jpeg",
-    observacao: "Encomendas com antecedência mínima de 24 horas."
+    id: 9,
+    nome: "Pudim de creme",
+    desc: "Pudim inteiro sob encomenda. Pedir com 24h de antecedência.",
+    preco: 40.00,
+    cat: "doces",
+    emoji: "🍮",
+    unid: "unidade",
+    antecedencia: true,
+    foto: "pudim2.jpeg"
   }
 ];
 
-const pedido = [];
+/* Nomes de exibição para cada categoria — aparece como título de seção */
+const catNomes = {
+  paes:  "🍞 Pães",
+  bolos: "🎂 Bolos & Tortas",
+  doces: "🍮 Doces & Confeitaria"
+  /* → Para nova categoria: adicione aqui, ex.: salgados: "🥐 Salgados" */
+};
 
-const produtosGrid = document.getElementById("produtosGrid");
-const pedidoLista = document.getElementById("pedidoLista");
-const pedidoVazio = document.getElementById("pedidoVazio");
-const quantidadeItens = document.getElementById("quantidadeItens");
-const totalPedido = document.getElementById("totalPedido");
-const btnLimparPedido = document.getElementById("btnLimparPedido");
-const nomeCliente = document.getElementById("nomeCliente");
-const telefoneCliente = document.getElementById("telefoneCliente");
-const dataRetirada = document.getElementById("dataRetirada");
-const horarioRetirada = document.getElementById("horarioRetirada");
-const observacoesPedido = document.getElementById("observacoesPedido");
-const btnFinalizar = document.getElementById("btnFinalizar");
-const mensagemStatus = document.getElementById("mensagemStatus");
-const previewMensagem = document.getElementById("previewMensagem");
 
-function formatarMoeda(valor) {
-  return valor.toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL"
-  });
+/* ═══════════════════════════════════════════════════════════════
+   ② ESTADO DA APLICAÇÃO
+   ═══════════════════════════════════════════════════════════════ */
+
+/** Carrinho: chave = id do produto, valor = quantidade */
+let carrinho = {};
+
+/** Categoria atualmente selecionada no filtro */
+let catAtual = "todos";
+
+
+/* ═══════════════════════════════════════════════════════════════
+   ③ UTILITÁRIOS
+   ═══════════════════════════════════════════════════════════════ */
+
+/** Formata número como moeda: 9.5 → "R$ 9,50" */
+function fmt(valor) {
+  return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-function formatarDataBR(dataStr) {
-  const [ano, mes, dia] = dataStr.split("-");
-  return `${dia}/${mes}/${ano}`;
+/** Formata telefone enquanto o usuário digita: (24) 99999-9999 */
+function fmtTelefone(valor) {
+  valor = valor.replace(/\D/g, "");
+  if (valor.length > 11) valor = valor.slice(0, 11);
+  if (valor.length <= 10) {
+    valor = valor.replace(/^(\d{2})(\d)/, "($1) $2");
+    valor = valor.replace(/(\d{4})(\d)/, "$1-$2");
+  } else {
+    valor = valor.replace(/^(\d{2})(\d)/, "($1) $2");
+    valor = valor.replace(/(\d{5})(\d)/, "$1-$2");
+  }
+  return valor;
 }
 
-function obterNomeDiaSemana(dataStr) {
-  const data = new Date(dataStr + "T00:00:00");
-  const nomes = [
+/**
+ * Formata a data do campo (yyyy-mm-dd) para o formato da mensagem.
+ * Resultado: "18/04/2026 - sábado"
+ *
+ * → Para mudar o formato: edite o return dentro desta função.
+ * → Os nomes dos dias estão no array diasSemana — altere se quiser abreviar.
+ */
+function fmtData(dataIso) {
+  if (!dataIso) return "-";
+
+  const [ano, mes, dia] = dataIso.split("-");
+
+  /* Nomes dos dias da semana — índice 0 = domingo, 6 = sábado */
+  const diasSemana = [
     "domingo",
     "segunda-feira",
     "terça-feira",
@@ -135,478 +214,431 @@ function obterNomeDiaSemana(dataStr) {
     "sexta-feira",
     "sábado"
   ];
-  return nomes[data.getDay()];
+
+  /* new Date(ano, mes-1, dia) cria a data sem problemas de fuso horário */
+  const nomeDia = diasSemana[new Date(ano, mes - 1, dia).getDay()];
+
+  /* Formato final: dd/mm/aaaa - dia da semana */
+  return `${dia}/${mes}/${ano} - ${nomeDia}`;
 }
 
-function obterIntervaloFuncionamento(dataStr) {
-  const data = new Date(dataStr + "T00:00:00");
-  const diaSemana = data.getDay();
-
-  if (diaSemana === 0) {
-    return { inicio: 6, fim: 12 };
-  }
-
-  return { inicio: 6, fim: 21 };
+/** Busca produto pelo id */
+function buscarProduto(id) {
+  return produtos.find(p => p.id == id);
 }
 
-function gerarHorariosDisponiveis(dataStr) {
-  if (!dataStr) return [];
-
-  const horarios = [];
-  const { inicio, fim } = obterIntervaloFuncionamento(dataStr);
-
-  const agora = new Date();
-  const anoHoje = agora.getFullYear();
-  const mesHoje = String(agora.getMonth() + 1).padStart(2, "0");
-  const diaHoje = String(agora.getDate()).padStart(2, "0");
-  const hojeStr = `${anoHoje}-${mesHoje}-${diaHoje}`;
-
-  const mesmaData = dataStr === hojeStr;
-
-  for (let hora = inicio; hora <= fim; hora++) {
-    const horaFormatada = String(hora).padStart(2, "0") + ":00";
-
-    if (mesmaData) {
-      const dataHoraEscolhida = new Date(`${dataStr}T${horaFormatada}:00`);
-      if (dataHoraEscolhida <= agora) {
-        continue;
-      }
-    }
-
-    horarios.push(horaFormatada);
-  }
-
-  return horarios;
+/** Soma todas as quantidades no carrinho */
+function totalQuantidade() {
+  return Object.values(carrinho).reduce((acc, q) => acc + q, 0);
 }
 
-function aplicarMascaraTelefone(valor) {
-  const numeros = valor.replace(/\D/g, "").slice(0, 11);
-
-  if (numeros.length <= 2) {
-    return numeros.length ? `(${numeros}` : "";
-  }
-
-  if (numeros.length <= 7) {
-    return `(${numeros.slice(0, 2)}) ${numeros.slice(2)}`;
-  }
-
-  if (numeros.length <= 10) {
-    return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 6)}-${numeros.slice(6)}`;
-  }
-
-  return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 7)}-${numeros.slice(7, 11)}`;
+/** Calcula valor total do carrinho */
+function totalValor() {
+  return Object.keys(carrinho).reduce((acc, id) => {
+    const p = buscarProduto(id);
+    return acc + (p ? p.preco * carrinho[id] : 0);
+  }, 0);
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   ④ RENDERIZAÇÃO DOS PRODUTOS
+   ═══════════════════════════════════════════════════════════════ */
 
 function renderizarProdutos() {
-  if (!produtosGrid) return;
+  const grid = document.getElementById("produtosGrid");
 
-  produtosGrid.innerHTML = "";
+  const lista = catAtual === "todos"
+    ? produtos
+    : produtos.filter(p => p.cat === catAtual);
 
-  produtos.forEach(produto => {
-    const card = document.createElement("article");
-    card.className = "produto-card";
+  let html = "";
 
-    let textoPreco = "";
-    if (produto.id === 4) {
-      textoPreco = "R$ 90,00 o cento";
-    } else if (produto.id === 5) {
-      textoPreco = "R$ 70,00 o cento";
-    } else {
-      textoPreco = formatarMoeda(produto.preco);
-    }
-
-    card.innerHTML = `
-      <img src="${produto.imagem}" alt="${produto.nome}" />
-
-      <div class="produto-info">
-        <h3>${produto.nome}</h3>
-        <div class="produto-descricao">${produto.descricao}</div>
-        <div class="produto-preco">${textoPreco}</div>
-        <div class="produto-obs">${produto.observacao || "&nbsp;"}</div>
-
-        <div class="controle-quantidade">
-          <button
-            class="btn-qtd"
-            type="button"
-            aria-label="Diminuir quantidade"
-            onclick="alterarQuantidade(${produto.id}, -1)"
-          >−</button>
-
-          <input
-            type="number"
-            min="${produto.quantidadeMinima}"
-            step="1"
-            value="${produto.quantidadeMinima}"
-            id="qtd-${produto.id}"
-          />
-
-          <button
-            class="btn-qtd"
-            type="button"
-            aria-label="Aumentar quantidade"
-            onclick="alterarQuantidade(${produto.id}, 1)"
-          >+</button>
-        </div>
-
-        <button class="btn btn-add" type="button" onclick="adicionarAoPedido(${produto.id})">
-          Adicionar ao pedido
-        </button>
-      </div>
-    `;
-
-    produtosGrid.appendChild(card);
-  });
-}
-
-function alterarQuantidade(produtoId, delta) {
-  const produto = produtos.find(item => item.id === produtoId);
-  const input = document.getElementById(`qtd-${produtoId}`);
-
-  if (!produto || !input) return;
-
-  let valorAtual = Number(input.value) || produto.quantidadeMinima;
-  valorAtual += delta;
-
-  if (valorAtual < produto.quantidadeMinima) {
-    valorAtual = produto.quantidadeMinima;
-  }
-
-  input.value = valorAtual;
-}
-
-function adicionarAoPedido(produtoId) {
-  limparMensagemStatus();
-
-  const produto = produtos.find(item => item.id === produtoId);
-  const inputQuantidade = document.getElementById(`qtd-${produtoId}`);
-
-  if (!produto || !inputQuantidade) return;
-
-  const quantidade = Number(inputQuantidade.value);
-
-  if (!quantidade || quantidade <= 0) {
-    mostrarErro("Informe uma quantidade válida.");
-    return;
-  }
-
-  if (quantidade < produto.quantidadeMinima) {
-    mostrarErro(`O produto "${produto.nome}" exige quantidade mínima de ${produto.quantidadeMinima}.`);
-    return;
-  }
-
-  const subtotal = quantidade * produto.preco;
-
-  pedido.push({
-    produtoId: produto.id,
-    nome: produto.nome,
-    quantidade,
-    unidadeLabel: produto.unidadeLabel,
-    subtotal,
-    exige24h: produto.exige24h
-  });
-
-  renderizarPedido();
-  atualizarPreviewMensagem();
-  mostrarSucesso(`"${produto.nome}" foi adicionado ao pedido.`);
-}
-
-function removerItem(index) {
-  pedido.splice(index, 1);
-  renderizarPedido();
-  atualizarPreviewMensagem();
-  mostrarSucesso("Item removido do pedido.");
-}
-
-function limparPedido() {
-  pedido.length = 0;
-  renderizarPedido();
-  atualizarPreviewMensagem();
-  mostrarSucesso("Pedido limpo com sucesso.");
-}
-
-function renderizarPedido() {
-  if (!pedidoLista || !pedidoVazio || !quantidadeItens || !totalPedido) return;
-
-  pedidoLista.innerHTML = "";
-
-  if (pedido.length === 0) {
-    pedidoVazio.style.display = "block";
+  if (catAtual === "todos") {
+    const categorias = [...new Set(lista.map(p => p.cat))];
+    categorias.forEach(cat => {
+      const itens = lista.filter(p => p.cat === cat);
+      html += `<h2 class="secao-titulo">${catNomes[cat] || cat}</h2>`;
+      html += `<div class="grid-produtos">${itens.map(gerarCardHtml).join("")}</div>`;
+    });
   } else {
-    pedidoVazio.style.display = "none";
+    html = `<div class="grid-produtos" style="margin-top:16px">${lista.map(gerarCardHtml).join("")}</div>`;
   }
 
-  let totalItens = 0;
-  let totalGeral = 0;
+  grid.innerHTML = html;
+}
 
-  pedido.forEach((item, index) => {
-    totalItens += item.quantidade;
-    totalGeral += item.subtotal;
+/**
+ * Gera o HTML de um card de produto.
+ *
+ * LÓGICA DA IMAGEM:
+ *   1. Se p.foto estiver preenchido → exibe a foto
+ *   2. Se p.foto estiver vazio ou ausente → exibe o emoji como fallback
+ *
+ * No carrinho lateral, sempre usa o emoji (ícone pequeno).
+ */
+function gerarCardHtml(p) {
+  const qty = carrinho[p.id] || 0;
 
-    const li = document.createElement("li");
-    li.className = "pedido-item";
-    li.innerHTML = `
-      <div class="pedido-item__topo">
-        <h4>${item.nome}</h4>
-        <button class="btn-remover" type="button" onclick="removerItem(${index})">Remover</button>
+  const unidLabel = {
+    pacote:  "por pacote",
+    cento:   "por cento",
+    unidade: "por unidade",
+    kg:      "por kg"
+  }[p.unid] || p.unid;
+
+  const thumbHtml = p.foto
+    ? `<img
+         src="${p.foto}"
+         alt="${p.nome}"
+         class="card__foto"
+         onerror="fotoFallback(this, '${p.emoji}')"
+       />`
+    : `<span class="card__emoji">${p.emoji}</span>`;
+
+  return `
+    <div class="card">
+      <div class="card__thumb">
+        ${thumbHtml}
+        ${p.antecedencia ? '<span class="card__tag">24h</span>' : ""}
       </div>
-      <p>Quantidade: ${item.quantidade} ${item.unidadeLabel}</p>
-      <p>Subtotal: <strong>${formatarMoeda(item.subtotal)}</strong></p>
-    `;
-    pedidoLista.appendChild(li);
-  });
-
-  quantidadeItens.textContent = totalItens;
-  totalPedido.textContent = formatarMoeda(totalGeral);
+      <div class="card__body">
+        <div class="card__nome">${p.nome}</div>
+        <div class="card__desc">${p.desc}</div>
+        <div class="card__rodape">
+          <div class="card__preco-wrap">
+            <span class="card__unid">${unidLabel}</span>
+            <span class="card__preco">${fmt(p.preco)}</span>
+          </div>
+          <div class="controle">
+            <button class="controle__btn"              onclick="mudaQuantidade(${p.id}, -1)" aria-label="Diminuir">−</button>
+            <span   class="controle__num"              id="qty${p.id}">${qty}</span>
+            <button class="controle__btn controle__btn--add" onclick="mudaQuantidade(${p.id}, 1)"  aria-label="Adicionar">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
-function configurarDataMinima() {
-  if (!dataRetirada) return;
-
-  const hoje = new Date();
-  const yyyy = hoje.getFullYear();
-  const mm = String(hoje.getMonth() + 1).padStart(2, "0");
-  const dd = String(hoje.getDate()).padStart(2, "0");
-  dataRetirada.min = `${yyyy}-${mm}-${dd}`;
+/**
+ * Fallback automático: se a imagem não carregar,
+ * substitui o <img> pelo emoji para não quebrar o layout.
+ */
+function fotoFallback(imgEl, emoji) {
+  const span = document.createElement("span");
+  span.className = "card__emoji";
+  span.textContent = emoji;
+  imgEl.replaceWith(span);
 }
 
-function atualizarHorarios() {
-  if (!horarioRetirada || !dataRetirada) return;
 
-  const dataSelecionada = dataRetirada.value;
-  horarioRetirada.innerHTML = "";
+/* ═══════════════════════════════════════════════════════════════
+   ⑤ LÓGICA DO CARRINHO
+   ═══════════════════════════════════════════════════════════════ */
 
-  if (!dataSelecionada) {
-    horarioRetirada.innerHTML = `<option value="">Selecione primeiro a data</option>`;
-    atualizarPreviewMensagem();
+function mudaQuantidade(id, delta) {
+  if (!carrinho[id]) carrinho[id] = 0;
+  carrinho[id] = Math.max(0, carrinho[id] + delta);
+  if (carrinho[id] === 0) delete carrinho[id];
+
+  const numEl = document.getElementById("qty" + id);
+  if (numEl) numEl.textContent = carrinho[id] || 0;
+
+  if (delta > 0) {
+    const p = buscarProduto(id);
+    mostrarToast(`${p.nome} adicionado! ✓`);
+  }
+
+  atualizarUI();
+}
+
+function removerItem(id) {
+  delete carrinho[id];
+  const numEl = document.getElementById("qty" + id);
+  if (numEl) numEl.textContent = "0";
+  atualizarUI();
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   ⑥ ATUALIZAÇÃO GERAL DA INTERFACE
+   ═══════════════════════════════════════════════════════════════ */
+
+function atualizarUI() {
+  const qty = totalQuantidade();
+  const val = totalValor();
+
+  document.getElementById("headerBadge").textContent = qty;
+
+  const floatBar = document.getElementById("floatBar");
+  document.getElementById("fbQtd").textContent  = `${qty} ${qty === 1 ? "item" : "itens"}`;
+  document.getElementById("fbTotal").textContent = fmt(val);
+  floatBar.classList.toggle("visivel", qty > 0);
+
+  const body   = document.getElementById("cartBody");
+  const footer = document.getElementById("cartFooter");
+
+  if (qty === 0) {
+    body.innerHTML = `
+      <div class="cart-vazio">
+        <span class="cart-vazio__emoji">🥐</span>
+        <p>Seu pedido está vazio</p>
+        <small>Adicione produtos e finalize pelo WhatsApp!</small>
+      </div>`;
+    footer.style.display = "none";
+  } else {
+    footer.style.display = "block";
+    document.getElementById("cartTotal").textContent = fmt(val);
+
+    body.innerHTML = Object.keys(carrinho).map(id => {
+      const p = buscarProduto(id);
+      if (!p) return "";
+      const subtotal = p.preco * carrinho[id];
+      return `
+        <div class="cart-item">
+          <span class="cart-item__emoji">${p.emoji}</span>
+          <div class="cart-item__info">
+            <div class="cart-item__nome">${p.nome}</div>
+            <div class="cart-item__sub">${carrinho[id]}x ${fmt(p.preco)}</div>
+          </div>
+          <span class="cart-item__preco">${fmt(subtotal)}</span>
+          <button class="cart-item__remover" onclick="removerItem(${id})" aria-label="Remover ${p.nome}">🗑</button>
+        </div>`;
+    }).join("");
+  }
+
+  atualizarPreview();
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   ⑦ CARRINHO LATERAL — abrir / fechar
+   ═══════════════════════════════════════════════════════════════ */
+
+function abrirCarrinho() {
+  document.getElementById("cartPanel").classList.add("aberto");
+  document.getElementById("overlay").classList.add("aberto");
+  document.body.style.overflow = "hidden";
+}
+
+function fecharCarrinho() {
+  document.getElementById("cartPanel").classList.remove("aberto");
+  document.getElementById("overlay").classList.remove("aberto");
+  document.body.style.overflow = "";
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   ⑧ MODAL DE CHECKOUT — abrir / fechar
+   ═══════════════════════════════════════════════════════════════ */
+
+function abrirModal() {
+  fecharCarrinho();
+  document.getElementById("modalBg").classList.add("aberto");
+  document.body.style.overflow = "hidden";
+  atualizarPreview();
+}
+
+function fecharModal() {
+  document.getElementById("modalBg").classList.remove("aberto");
+  document.body.style.overflow = "";
+}
+
+function fecharModalFora(event) {
+  if (event.target === document.getElementById("modalBg")) fecharModal();
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   ⑨ HORÁRIOS DE ATENDIMENTO
+   ═══════════════════════════════════════════════════════════════ */
+
+function preencherHorarios() {
+  const dataVal = document.getElementById("inData").value;
+  const select  = document.getElementById("inHora");
+  select.innerHTML = "";
+
+  if (!dataVal) {
+    select.innerHTML = '<option value="">Selecione a data primeiro</option>';
+    atualizarPreview();
     return;
   }
 
-  const horarios = gerarHorariosDisponiveis(dataSelecionada);
+  const [ano, mes, dia] = dataVal.split("-").map(Number);
+  const dataSelecionada = new Date(ano, mes - 1, dia);
+  const diaSemana       = dataSelecionada.getDay();
+  const agora           = new Date();
 
-  if (horarios.length === 0) {
-    horarioRetirada.innerHTML = `<option value="">Não há horários disponíveis para esta data</option>`;
-    atualizarPreviewMensagem();
-    return;
+  const isHoje =
+    dataSelecionada.getFullYear() === agora.getFullYear() &&
+    dataSelecionada.getMonth()    === agora.getMonth()    &&
+    dataSelecionada.getDate()     === agora.getDate();
+
+  /* ── ALTERE AQUI PARA MUDAR OS HORÁRIOS ── */
+  const horaInicio = 6;
+  const horaFim    = diaSemana === 0 ? 12 : 21; // domingo fecha às 12h
+
+  const opcoesHorario = [];
+
+  for (let hora = horaInicio; hora <= horaFim; hora++) {
+    ["00", "30"].forEach(minuto => {
+      if (hora === horaFim && minuto === "30") return;
+      const horarioStr = `${String(hora).padStart(2, "0")}:${minuto}`;
+      if (isHoje) {
+        const horarioDate = new Date();
+        horarioDate.setHours(hora, parseInt(minuto), 0, 0);
+        if (horarioDate <= agora) return;
+      }
+      opcoesHorario.push(horarioStr);
+    });
   }
 
-  horarioRetirada.innerHTML = `<option value="">Selecione um horário</option>`;
+  select.innerHTML = opcoesHorario.length
+    ? '<option value="">Selecione um horário</option>' +
+      opcoesHorario.map(h => `<option value="${h}">${h}</option>`).join("")
+    : '<option value="">Nenhum horário disponível para hoje</option>';
 
-  horarios.forEach(horario => {
-    const option = document.createElement("option");
-    option.value = horario;
-    option.textContent = horario;
-    horarioRetirada.appendChild(option);
-  });
-
-  atualizarPreviewMensagem();
+  atualizarPreview();
 }
 
-function pedidoTemItemCom24h() {
-  return pedido.some(item => item.exige24h);
-}
 
-function validarAntecedencia24h() {
-  if (!pedidoTemItemCom24h()) return true;
-  if (!dataRetirada || !horarioRetirada) return false;
+/* ═══════════════════════════════════════════════════════════════
+   ⑩ GERAÇÃO E PRÉVIA DA MENSAGEM WHATSAPP
+   ═══════════════════════════════════════════════════════════════ */
 
-  const data = dataRetirada.value;
-  const horario = horarioRetirada.value;
+function gerarMensagem() {
+  if (!Object.keys(carrinho).length) {
+    return "Adicione produtos ao pedido para ver a prévia aqui.";
+  }
 
-  if (!data || !horario) return false;
-
-  const dataHoraRetirada = new Date(`${data}T${horario}:00`);
-  const agora = new Date();
-  const diffMs = dataHoraRetirada - agora;
-  const diffHoras = diffMs / (1000 * 60 * 60);
-
-  return diffHoras >= 24;
-}
-
-function validarHorarioFuncionamento() {
-  if (!dataRetirada || !horarioRetirada) return false;
-
-  const data = dataRetirada.value;
-  const horario = horarioRetirada.value;
-
-  if (!data || !horario) return false;
-
-  const horariosDisponiveis = gerarHorariosDisponiveis(data);
-  return horariosDisponiveis.includes(horario);
-}
-
-/*
-  Monta os itens com quebra real de linha.
-  Aqui está o principal ajuste para o WhatsApp não mostrar "\\n" literal.
-*/
-function montarTextoPedido() {
-  return pedido
-    .map(item => `• ${item.quantidade} ${item.unidadeLabel} de ${item.nome.toLowerCase()} - ${formatarMoeda(item.subtotal)}`)
+  const linhasProdutos = Object.keys(carrinho)
+    .map(id => {
+      const p = buscarProduto(id);
+      return `• ${carrinho[id]}x ${p.nome} — ${fmt(p.preco * carrinho[id])}`;
+    })
     .join("\n");
+
+  const nome = document.getElementById("inNome")?.value.trim() || "-";
+  const tel  = document.getElementById("inTel")?.value.trim()  || "-";
+  const obs  = document.getElementById("inObs")?.value.trim()  || "-";
+  const hora = document.getElementById("inHora")?.value        || "-";
+
+  /*
+   * DATA FORMATADA
+   * → Usa a função fmtData() que converte yyyy-mm-dd para dd/mm/aaaa - dia da semana
+   * → Exemplo: "20/04/2026 - segunda-feira"
+   * → Para mudar o formato: edite a função fmtData() na seção ③ acima
+   */
+  const dataRaw = document.getElementById("inData")?.value || "";
+  const data    = fmtData(dataRaw);
+
+  /* ── FORMATO DA MENSAGEM — edite aqui para mudar o texto enviado ── */
+  return `🥐 *ENCOMENDA — Padaria Bom Pastor*
+
+👤 *Nome:* ${nome}
+📱 *Contato:* ${tel}
+
+📅 *Data de retirada:* ${data}
+🕐 *Horário:* ${hora}
+
+🛒 *Itens do pedido:*
+${linhasProdutos}
+
+💰 *Total: ${fmt(totalValor())}*
+
+📍 *Retirada no local (não fazemos entregas)*
+
+📝 *Observações:* ${obs}`;
 }
 
-function calcularTotalGeral() {
-  return pedido.reduce((acc, item) => acc + item.subtotal, 0);
+function atualizarPreview() {
+  const el = document.getElementById("preview");
+  if (el) el.textContent = gerarMensagem();
 }
 
-/*
-  Monta a mensagem final usando array + join("\\n").
-  Isso deixa a formatação consistente e evita o texto ficar "colado".
-*/
-function montarMensagemFinal() {
-  if (pedido.length === 0) {
-    return "Adicione produtos ao pedido para visualizar a mensagem final.";
-  }
 
-  const nome = nomeCliente?.value.trim() || "[nome do cliente]";
-  const telefone = telefoneCliente?.value.trim() || "[telefone]";
-  const data = dataRetirada?.value ? formatarDataBR(dataRetirada.value) : "[data]";
-  const diaSemana = dataRetirada?.value ? obterNomeDiaSemana(dataRetirada.value) : "[dia da semana]";
-  const horario = horarioRetirada?.value || "[horário]";
-  const itens = montarTextoPedido();
-  const total = formatarMoeda(calcularTotalGeral());
-  const observacoes = observacoesPedido?.value.trim() || "";
+/* ═══════════════════════════════════════════════════════════════
+   ⑪ VALIDAÇÃO E ENVIO PARA O WHATSAPP
+   ═══════════════════════════════════════════════════════════════ */
 
-  const linhas = [
-    "Olá, gostaria de confirmar meu pedido:",
-    "",
-    `data: ${data} - ${diaSemana}`,
-    `horario: ${horario} horas`,
-    "",
-    "pedido:",
-    itens,
-    "",
-    `total: ${total}`,
-    "",
-    `nome: ${nome}`,
-    `telefone: ${telefone}`
-  ];
+function enviarWhatsApp() {
+  const nome   = document.getElementById("inNome").value.trim();
+  const tel    = document.getElementById("inTel").value.trim();
+  const data   = document.getElementById("inData").value;
+  const hora   = document.getElementById("inHora").value;
+  const status = document.getElementById("statusMsg");
 
-  if (observacoes) {
-    linhas.push("");
-    linhas.push("observações:");
-    linhas.push(observacoes);
-  }
+  status.textContent = "";
 
-  return linhas.join("\n");
+  if (!Object.keys(carrinho).length) { status.textContent = "⚠️ Adicione pelo menos 1 produto ao pedido."; return; }
+  if (!nome) { status.textContent = "⚠️ Por favor, informe o nome completo."; document.getElementById("inNome").focus(); return; }
+  if (!tel)  { status.textContent = "⚠️ Por favor, informe o WhatsApp/telefone."; document.getElementById("inTel").focus(); return; }
+  if (!data) { status.textContent = "⚠️ Selecione a data de retirada."; document.getElementById("inData").focus(); return; }
+  if (!hora) { status.textContent = "⚠️ Selecione o horário de retirada."; document.getElementById("inHora").focus(); return; }
+
+  const url = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(gerarMensagem())}`;
+  window.open(url, "_blank");
 }
 
-function atualizarPreviewMensagem() {
-  if (previewMensagem) {
-    previewMensagem.textContent = montarMensagemFinal();
-  }
+
+/* ═══════════════════════════════════════════════════════════════
+   ⑫ TOAST — notificação rápida
+   ═══════════════════════════════════════════════════════════════ */
+
+function mostrarToast(mensagem) {
+  const el = document.getElementById("toast");
+  el.textContent = mensagem;
+  el.classList.add("show");
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => el.classList.remove("show"), 1800);
 }
 
-function mostrarErro(texto) {
-  if (!mensagemStatus) return;
-  mensagemStatus.className = "mensagem-status mensagem-erro";
-  mensagemStatus.textContent = texto;
-}
 
-function mostrarSucesso(texto) {
-  if (!mensagemStatus) return;
-  mensagemStatus.className = "mensagem-status mensagem-sucesso";
-  mensagemStatus.textContent = texto;
-}
+/* ═══════════════════════════════════════════════════════════════
+   ⑬ FILTRO DE CATEGORIAS
+   ═══════════════════════════════════════════════════════════════ */
 
-function limparMensagemStatus() {
-  if (!mensagemStatus) return;
-  mensagemStatus.className = "mensagem-status";
-  mensagemStatus.textContent = "";
-}
-
-function validarFormularioFinal() {
-  if (pedido.length === 0) {
-    mostrarErro("Adicione pelo menos um item ao pedido antes de finalizar.");
-    return false;
-  }
-
-  if (!nomeCliente || !nomeCliente.value.trim()) {
-    mostrarErro("Informe o nome do cliente.");
-    return false;
-  }
-
-  if (!telefoneCliente || !telefoneCliente.value.trim()) {
-    mostrarErro("Informe o telefone do cliente.");
-    return false;
-  }
-
-  const telefoneNumeros = telefoneCliente.value.replace(/\D/g, "");
-  if (telefoneNumeros.length < 10) {
-    mostrarErro("Informe um telefone válido com DDD.");
-    return false;
-  }
-
-  if (!dataRetirada || !dataRetirada.value) {
-    mostrarErro("Selecione a data da retirada.");
-    return false;
-  }
-
-  if (!horarioRetirada || !horarioRetirada.value) {
-    mostrarErro("Selecione o horário da retirada.");
-    return false;
-  }
-
-  if (!validarHorarioFuncionamento()) {
-    mostrarErro("O horário selecionado é inválido para o dia escolhido.");
-    return false;
-  }
-
-  if (pedidoTemItemCom24h() && !validarAntecedencia24h()) {
-    mostrarErro("Mini pão de sal, pudim e rosca exigem antecedência mínima de 24 horas.");
-    return false;
-  }
-
-  return true;
-}
-
-function finalizarPedido() {
-  limparMensagemStatus();
-
-  if (!validarFormularioFinal()) return;
-
-  const mensagem = montarMensagemFinal();
-  const link = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=${encodeURIComponent(mensagem)}`;
-
-  window.open(link, "_blank");
-  mostrarSucesso("Pedido pronto. O WhatsApp foi aberto para confirmação.");
-}
-
-if (telefoneCliente) {
-  telefoneCliente.addEventListener("input", event => {
-    event.target.value = aplicarMascaraTelefone(event.target.value);
-    atualizarPreviewMensagem();
+document.querySelectorAll(".cat-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("ativa"));
+    btn.classList.add("ativa");
+    catAtual = btn.dataset.cat;
+    renderizarProdutos();
   });
+});
+
+
+/* ═══════════════════════════════════════════════════════════════
+   ⑭ EVENTOS DO FORMULÁRIO
+   ═══════════════════════════════════════════════════════════════ */
+
+document.getElementById("inTel").addEventListener("input", e => {
+  e.target.value = fmtTelefone(e.target.value);
+  atualizarPreview();
+});
+
+document.getElementById("inData").addEventListener("change", preencherHorarios);
+
+["inNome", "inObs"].forEach(id => {
+  document.getElementById(id)?.addEventListener("input", atualizarPreview);
+});
+
+document.getElementById("inHora")?.addEventListener("change", atualizarPreview);
+
+
+/* ═══════════════════════════════════════════════════════════════
+   ⑮ INICIALIZAÇÃO
+   ═══════════════════════════════════════════════════════════════ */
+
+function definirDataMinima() {
+  const hoje = new Date();
+  const ano  = hoje.getFullYear();
+  const mes  = String(hoje.getMonth() + 1).padStart(2, "0");
+  const dia  = String(hoje.getDate()).padStart(2, "0");
+  document.getElementById("inData").min = `${ano}-${mes}-${dia}`;
 }
 
-if (nomeCliente) {
-  nomeCliente.addEventListener("input", atualizarPreviewMensagem);
-}
-
-if (dataRetirada) {
-  dataRetirada.addEventListener("change", atualizarHorarios);
-}
-
-if (horarioRetirada) {
-  horarioRetirada.addEventListener("change", atualizarPreviewMensagem);
-}
-
-if (observacoesPedido) {
-  observacoesPedido.addEventListener("input", atualizarPreviewMensagem);
-}
-
-if (btnFinalizar) {
-  btnFinalizar.addEventListener("click", finalizarPedido);
-}
-
-if (btnLimparPedido) {
-  btnLimparPedido.addEventListener("click", limparPedido);
-}
-
+definirDataMinima();
 renderizarProdutos();
-renderizarPedido();
-configurarDataMinima();
-atualizarPreviewMensagem();
-
-window.alterarQuantidade = alterarQuantidade;
-window.adicionarAoPedido = adicionarAoPedido;
-window.removerItem = removerItem;
+atualizarUI();
