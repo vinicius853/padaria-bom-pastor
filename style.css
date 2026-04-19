@@ -607,7 +607,7 @@ img { display: block; max-width: 100%; }
 
 /* Número da quantidade */
 .controle__num {
-  min-width: 28px;
+  min-width: 40px;
   text-align: center;
   font-size: 15px;
   font-weight: 800;

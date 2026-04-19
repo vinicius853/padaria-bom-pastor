@@ -25,41 +25,8 @@ const WHATSAPP_NUMERO = "552433266628";
 
 /**
  * CARDÁPIO — lista de produtos disponíveis para encomenda.
- *
- * Cada produto é um objeto com os campos:
- *
- *   id           → número único; nunca repita (usado como chave interna)
- *   nome         → texto exibido no card e na mensagem do WhatsApp
- *   desc         → descrição curta exibida embaixo do nome no card
- *   preco        → valor em reais (número; use ponto como decimal: 9.50)
- *   cat          → categoria: "paes" | "bolos" | "doces"
- *                  → Para nova categoria: adicione aqui e crie botão no index.html
- *   unid         → unidade de venda: "pacote" | "cento" | "unidade" | "kg"
- *   antecedencia → (opcional) true = exibe badge "24h" no card
- *
- *   ┌─────────────────────────────────────────────────────────┐
- *   │  FOTO DO PRODUTO — como usar:                           │
- *   │                                                         │
- *   │  foto: "fotos/nome-do-arquivo.jpg"                      │
- *   │    → Coloque a imagem na pasta "fotos/" ao lado do site │
- *   │    → Formatos aceitos: .jpg .jpeg .png .webp            │
- *   │    → Tamanho ideal: 400x300px ou maior (16:9 ou 4:3)   │
- *   │                                                         │
- *   │  foto: "https://site.com/imagem.jpg"                    │
- *   │    → Também funciona com link direto de imagem online   │
- *   │                                                         │
- *   │  Se NÃO colocar foto (ou deixar foto: ""), o emoji      │
- *   │  será exibido automaticamente como substituto.          │
- *   └─────────────────────────────────────────────────────────┘
- *
- *   emoji → usado no carrinho lateral e como substituto se não houver foto
  */
 const produtos = [
-
-  /* ── PÃES ──────────────────────────────────────────────────
-     Para adicionar foto: coloque o arquivo na pasta "fotos/"
-     e preencha: foto: "fotos/nome-do-arquivo.jpg"
-  ─────────────────────────────────────────────────────────── */
   {
     id: 1,
     nome: "Pão de Cachorro-Quente",
@@ -93,26 +60,36 @@ const produtos = [
   {
     id: 4,
     nome: "Mini Pão de Sal",
-    desc: "Venda por cento. Ideal para eventos e cafés. Pedir com 24h de antecedência.",
-    preco: 70.00,
+    desc: "Pedido mínimo de 50 unidades. Ideal para eventos e cafés. Pedir com 24h de antecedência.",
+    preco: 0.70,
     cat: "paes",
     emoji: "🥐",
-    unid: "cento",
+    unid: "unidade",
+    qtdMinima: 50,
     antecedencia: true,
     foto: "mini.png"
   },
   {
     id: 5,
     nome: "Pão de Sal Tradicional",
-    desc: "Venda por cento. Fresquinho e crocante.",
-    preco: 90.00,
+    desc: "Pedido mínimo de 50 unidades. Fresquinho e crocante.",
+    preco: 0.90,
     cat: "paes",
     emoji: "🍞",
-    unid: "cento",
+    unid: "unidade",
+    qtdMinima: 50,
     foto: "pao-sal.jpeg"
   },
-
-  /* ── BOLOS ──────────────────────────────────────────────── */
+  {
+  id: 10,
+  nome: "Rosca Salgada",
+  desc: "Rosca salgada recheada com presunto, queijo e maionese, feita no dia para garantir sabor e maciez. Ideal para café e lanche.",
+  preco: 19.00,
+  cat: "paes",
+  emoji: "🥨",
+  unid: "unidade",
+  foto: "rosca.jpeg"
+},
   {
     id: 6,
     nome: "torta de limão",
@@ -123,8 +100,6 @@ const produtos = [
     unid: "unidade",
     foto: "torta.jpeg"
   },
-
-  /* ── DOCES ──────────────────────────────────────────────── */
   {
     id: 8,
     nome: "Pudim de leite condensado",
@@ -154,7 +129,6 @@ const catNomes = {
   paes:  "🍞 Pães",
   bolos: "🎂 Bolos & Tortas",
   doces: "🍮 Doces & Confeitaria"
-  /* → Para nova categoria: adicione aqui, ex.: salgados: "🥐 Salgados" */
 };
 
 
@@ -162,10 +136,7 @@ const catNomes = {
    ② ESTADO DA APLICAÇÃO
    ═══════════════════════════════════════════════════════════════ */
 
-/** Carrinho: chave = id do produto, valor = quantidade */
 let carrinho = {};
-
-/** Categoria atualmente selecionada no filtro */
 let catAtual = "todos";
 
 
@@ -173,15 +144,14 @@ let catAtual = "todos";
    ③ UTILITÁRIOS
    ═══════════════════════════════════════════════════════════════ */
 
-/** Formata número como moeda: 9.5 → "R$ 9,50" */
 function fmt(valor) {
   return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-/** Formata telefone enquanto o usuário digita: (24) 99999-9999 */
 function fmtTelefone(valor) {
   valor = valor.replace(/\D/g, "");
   if (valor.length > 11) valor = valor.slice(0, 11);
+
   if (valor.length <= 10) {
     valor = valor.replace(/^(\d{2})(\d)/, "($1) $2");
     valor = valor.replace(/(\d{4})(\d)/, "$1-$2");
@@ -189,22 +159,15 @@ function fmtTelefone(valor) {
     valor = valor.replace(/^(\d{2})(\d)/, "($1) $2");
     valor = valor.replace(/(\d{5})(\d)/, "$1-$2");
   }
+
   return valor;
 }
 
-/**
- * Formata a data do campo (yyyy-mm-dd) para o formato da mensagem.
- * Resultado: "18/04/2026 - sábado"
- *
- * → Para mudar o formato: edite o return dentro desta função.
- * → Os nomes dos dias estão no array diasSemana — altere se quiser abreviar.
- */
 function fmtData(dataIso) {
   if (!dataIso) return "-";
 
   const [ano, mes, dia] = dataIso.split("-");
 
-  /* Nomes dos dias da semana — índice 0 = domingo, 6 = sábado */
   const diasSemana = [
     "domingo",
     "segunda-feira",
@@ -215,29 +178,40 @@ function fmtData(dataIso) {
     "sábado"
   ];
 
-  /* new Date(ano, mes-1, dia) cria a data sem problemas de fuso horário */
   const nomeDia = diasSemana[new Date(ano, mes - 1, dia).getDay()];
-
-  /* Formato final: dd/mm/aaaa - dia da semana */
   return `${dia}/${mes}/${ano} - ${nomeDia}`;
 }
 
-/** Busca produto pelo id */
 function buscarProduto(id) {
   return produtos.find(p => p.id == id);
 }
 
-/** Soma todas as quantidades no carrinho */
 function totalQuantidade() {
   return Object.values(carrinho).reduce((acc, q) => acc + q, 0);
 }
 
-/** Calcula valor total do carrinho */
 function totalValor() {
   return Object.keys(carrinho).reduce((acc, id) => {
     const p = buscarProduto(id);
     return acc + (p ? p.preco * carrinho[id] : 0);
   }, 0);
+}
+
+function getLabelUnidade(unid) {
+  return {
+    pacote: "por pacote",
+    cento: "por cento",
+    unidade: "por unidade",
+    kg: "por kg"
+  }[unid] || unid;
+}
+
+function getTextoQuantidade(produto, quantidade) {
+  if (produto.unid === "unidade") return `${quantidade} un.`;
+  if (produto.unid === "pacote") return `${quantidade}x`;
+  if (produto.unid === "cento") return `${quantidade}x`;
+  if (produto.unid === "kg") return `${quantidade} kg`;
+  return `${quantidade}x`;
 }
 
 
@@ -268,24 +242,13 @@ function renderizarProdutos() {
   grid.innerHTML = html;
 }
 
-/**
- * Gera o HTML de um card de produto.
- *
- * LÓGICA DA IMAGEM:
- *   1. Se p.foto estiver preenchido → exibe a foto
- *   2. Se p.foto estiver vazio ou ausente → exibe o emoji como fallback
- *
- * No carrinho lateral, sempre usa o emoji (ícone pequeno).
- */
 function gerarCardHtml(p) {
   const qty = carrinho[p.id] || 0;
+  const unidLabel = getLabelUnidade(p.unid);
 
-  const unidLabel = {
-    pacote:  "por pacote",
-    cento:   "por cento",
-    unidade: "por unidade",
-    kg:      "por kg"
-  }[p.unid] || p.unid;
+  const infoMinima = p.qtdMinima
+    ? `<div class="card__desc" style="margin-top:-6px; margin-bottom:10px; color:#A97208; font-weight:800;">Pedido mínimo: ${p.qtdMinima} unidades</div>`
+    : "";
 
   const thumbHtml = p.foto
     ? `<img
@@ -305,15 +268,16 @@ function gerarCardHtml(p) {
       <div class="card__body">
         <div class="card__nome">${p.nome}</div>
         <div class="card__desc">${p.desc}</div>
+        ${infoMinima}
         <div class="card__rodape">
           <div class="card__preco-wrap">
             <span class="card__unid">${unidLabel}</span>
             <span class="card__preco">${fmt(p.preco)}</span>
           </div>
           <div class="controle">
-            <button class="controle__btn"              onclick="mudaQuantidade(${p.id}, -1)" aria-label="Diminuir">−</button>
-            <span   class="controle__num"              id="qty${p.id}">${qty}</span>
-            <button class="controle__btn controle__btn--add" onclick="mudaQuantidade(${p.id}, 1)"  aria-label="Adicionar">+</button>
+            <button class="controle__btn" onclick="mudaQuantidade(${p.id}, -1)" aria-label="Diminuir">−</button>
+            <span class="controle__num" id="qty${p.id}">${qty}</span>
+            <button class="controle__btn controle__btn--add" onclick="mudaQuantidade(${p.id}, 1)" aria-label="Adicionar">+</button>
           </div>
         </div>
       </div>
@@ -321,10 +285,6 @@ function gerarCardHtml(p) {
   `;
 }
 
-/**
- * Fallback automático: se a imagem não carregar,
- * substitui o <img> pelo emoji para não quebrar o layout.
- */
 function fotoFallback(imgEl, emoji) {
   const span = document.createElement("span");
   span.className = "card__emoji";
@@ -338,16 +298,38 @@ function fotoFallback(imgEl, emoji) {
    ═══════════════════════════════════════════════════════════════ */
 
 function mudaQuantidade(id, delta) {
-  if (!carrinho[id]) carrinho[id] = 0;
-  carrinho[id] = Math.max(0, carrinho[id] + delta);
-  if (carrinho[id] === 0) delete carrinho[id];
+  const produto = buscarProduto(id);
+  if (!produto) return;
+
+  const qtdAtual = carrinho[id] || 0;
+  const qtdMinima = produto.qtdMinima || 1;
+  let novaQtd = qtdAtual;
+
+  if (delta > 0) {
+    novaQtd = qtdAtual === 0 ? qtdMinima : qtdAtual + delta;
+  } else if (delta < 0) {
+    if (qtdAtual <= qtdMinima && produto.qtdMinima) {
+      novaQtd = 0;
+    } else {
+      novaQtd = Math.max(0, qtdAtual + delta);
+    }
+  }
+
+  if (novaQtd > 0) {
+    carrinho[id] = novaQtd;
+  } else {
+    delete carrinho[id];
+  }
 
   const numEl = document.getElementById("qty" + id);
   if (numEl) numEl.textContent = carrinho[id] || 0;
 
   if (delta > 0) {
-    const p = buscarProduto(id);
-    mostrarToast(`${p.nome} adicionado! ✓`);
+    if (produto.qtdMinima && qtdAtual === 0) {
+      mostrarToast(`${produto.nome} adicionado com mínimo de ${produto.qtdMinima} unidades ✓`);
+    } else {
+      mostrarToast(`${produto.nome} adicionado! ✓`);
+    }
   }
 
   atualizarUI();
@@ -394,13 +376,17 @@ function atualizarUI() {
     body.innerHTML = Object.keys(carrinho).map(id => {
       const p = buscarProduto(id);
       if (!p) return "";
-      const subtotal = p.preco * carrinho[id];
+
+      const quantidade = carrinho[id];
+      const subtotal = p.preco * quantidade;
+      const textoQuantidade = getTextoQuantidade(p, quantidade);
+
       return `
         <div class="cart-item">
           <span class="cart-item__emoji">${p.emoji}</span>
           <div class="cart-item__info">
             <div class="cart-item__nome">${p.nome}</div>
-            <div class="cart-item__sub">${carrinho[id]}x ${fmt(p.preco)}</div>
+            <div class="cart-item__sub">${textoQuantidade} ${p.unid === "unidade" ? `× ${fmt(p.preco)}` : fmt(p.preco)}</div>
           </div>
           <span class="cart-item__preco">${fmt(subtotal)}</span>
           <button class="cart-item__remover" onclick="removerItem(${id})" aria-label="Remover ${p.nome}">🗑</button>
@@ -472,24 +458,26 @@ function preencherHorarios() {
 
   const isHoje =
     dataSelecionada.getFullYear() === agora.getFullYear() &&
-    dataSelecionada.getMonth()    === agora.getMonth()    &&
+    dataSelecionada.getMonth()    === agora.getMonth() &&
     dataSelecionada.getDate()     === agora.getDate();
 
-  /* ── ALTERE AQUI PARA MUDAR OS HORÁRIOS ── */
   const horaInicio = 6;
-  const horaFim    = diaSemana === 0 ? 12 : 21; // domingo fecha às 12h
+  const horaFim    = diaSemana === 0 ? 12 : 21;
 
   const opcoesHorario = [];
 
   for (let hora = horaInicio; hora <= horaFim; hora++) {
     ["00", "30"].forEach(minuto => {
       if (hora === horaFim && minuto === "30") return;
+
       const horarioStr = `${String(hora).padStart(2, "0")}:${minuto}`;
+
       if (isHoje) {
         const horarioDate = new Date();
         horarioDate.setHours(hora, parseInt(minuto), 0, 0);
         if (horarioDate <= agora) return;
       }
+
       opcoesHorario.push(horarioStr);
     });
   }
@@ -515,7 +503,14 @@ function gerarMensagem() {
   const linhasProdutos = Object.keys(carrinho)
     .map(id => {
       const p = buscarProduto(id);
-      return `• ${carrinho[id]}x ${p.nome} — ${fmt(p.preco * carrinho[id])}`;
+      const quantidade = carrinho[id];
+      const subtotal = p.preco * quantidade;
+
+      if (p.unid === "unidade") {
+        return `• ${p.nome}: ${quantidade} unidades — ${fmt(subtotal)}`;
+      }
+
+      return `• ${quantidade}x ${p.nome} — ${fmt(subtotal)}`;
     })
     .join("\n");
 
@@ -524,16 +519,9 @@ function gerarMensagem() {
   const obs  = document.getElementById("inObs")?.value.trim()  || "-";
   const hora = document.getElementById("inHora")?.value        || "-";
 
-  /*
-   * DATA FORMATADA
-   * → Usa a função fmtData() que converte yyyy-mm-dd para dd/mm/aaaa - dia da semana
-   * → Exemplo: "20/04/2026 - segunda-feira"
-   * → Para mudar o formato: edite a função fmtData() na seção ③ acima
-   */
   const dataRaw = document.getElementById("inData")?.value || "";
   const data    = fmtData(dataRaw);
 
-  /* ── FORMATO DA MENSAGEM — edite aqui para mudar o texto enviado ── */
   return `🥐 *ENCOMENDA — Padaria Bom Pastor*
 
 👤 *Nome:* ${nome}
@@ -571,11 +559,34 @@ function enviarWhatsApp() {
 
   status.textContent = "";
 
-  if (!Object.keys(carrinho).length) { status.textContent = "⚠️ Adicione pelo menos 1 produto ao pedido."; return; }
-  if (!nome) { status.textContent = "⚠️ Por favor, informe o nome completo."; document.getElementById("inNome").focus(); return; }
-  if (!tel)  { status.textContent = "⚠️ Por favor, informe o WhatsApp/telefone."; document.getElementById("inTel").focus(); return; }
-  if (!data) { status.textContent = "⚠️ Selecione a data de retirada."; document.getElementById("inData").focus(); return; }
-  if (!hora) { status.textContent = "⚠️ Selecione o horário de retirada."; document.getElementById("inHora").focus(); return; }
+  if (!Object.keys(carrinho).length) {
+    status.textContent = "⚠️ Adicione pelo menos 1 produto ao pedido.";
+    return;
+  }
+
+  if (!nome) {
+    status.textContent = "⚠️ Por favor, informe o nome completo.";
+    document.getElementById("inNome").focus();
+    return;
+  }
+
+  if (!tel) {
+    status.textContent = "⚠️ Por favor, informe o WhatsApp/telefone.";
+    document.getElementById("inTel").focus();
+    return;
+  }
+
+  if (!data) {
+    status.textContent = "⚠️ Selecione a data de retirada.";
+    document.getElementById("inData").focus();
+    return;
+  }
+
+  if (!hora) {
+    status.textContent = "⚠️ Selecione o horário de retirada.";
+    document.getElementById("inHora").focus();
+    return;
+  }
 
   const url = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(gerarMensagem())}`;
   window.open(url, "_blank");
