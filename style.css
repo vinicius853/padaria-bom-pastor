@@ -2,15 +2,8 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║           PADARIA BOM PASTOR — style.css                      ║
   ╠═══════════════════════════════════════════════════════════════╣
-  ║  PALETA DE CORES (edite as variáveis abaixo para mudar tema)  ║
-  ║                                                               ║
-  ║  --dourado      → cor de destaque dourada (botões, ênfase)   ║
-  ║  --dourado-esc  → dourado mais escuro (hover, bordas)        ║
-  ║  --marrom       → marrom principal (header, hero, footer)     ║
-  ║  --marrom-esc   → marrom muito escuro (fundos profundos)      ║
-  ║  --creme        → fundo geral da página                       ║
-  ║  --texto        → cor principal do texto                      ║
-  ║  --muted        → texto secundário / cinza médio             ║
+  ║  CSS ajustado para melhor responsividade em celulares         ║
+  ║  e para evitar cortes laterais / estouro de layout.          ║
   ╚═══════════════════════════════════════════════════════════════╝
 */
 
@@ -22,65 +15,80 @@
 }
 
 :root {
-  /* Cores principais — inspire-se na logo para manter identidade */
-  --dourado:      #D4920A;   /* dourado da logo */
-  --dourado-esc:  #A97208;   /* dourado mais escuro (hover) */
-  --dourado-claro:#F5C842;   /* dourado brilhante (detalhes) */
-  --marrom:       #3B1E0A;   /* marrom escuro da logo */
-  --marrom-med:   #5C2D0D;   /* marrom médio */
-  --marrom-claro: #7A3F14;   /* marrom claro (hover no header) */
-  --creme:        #FBF5E6;   /* fundo geral — quente e acolhedor */
-  --creme-card:   #FFFDF5;   /* fundo dos cards de produto */
-  --texto:        #2A1405;   /* texto principal — marrom bem escuro */
-  --muted:        #8A6F50;   /* texto secundário — marrom claro */
-  --borda:        #E8D5B0;   /* cor das bordas */
-  --verde-wpp:    #25D366;   /* cor do WhatsApp */
-  --verde-wpp-esc:#1EB356;   /* hover no botão do WhatsApp */
+  --dourado:      #D4920A;
+  --dourado-esc:  #A97208;
+  --dourado-claro:#F5C842;
+  --marrom:       #3B1E0A;
+  --marrom-med:   #5C2D0D;
+  --marrom-claro: #7A3F14;
+  --creme:        #FBF5E6;
+  --creme-card:   #FFFDF5;
+  --texto:        #2A1405;
+  --muted:        #8A6F50;
+  --borda:        #E8D5B0;
+  --verde-wpp:    #25D366;
+  --verde-wpp-esc:#1EB356;
 
-  /* Sombras e raios */
   --sombra-card:  0 2px 16px rgba(59, 30, 10, 0.09);
   --sombra-hover: 0 8px 32px rgba(59, 30, 10, 0.16);
   --radius-card:  16px;
   --radius-btn:   12px;
 }
 
-/* ─── FONTE BASE ────────────────────────────────────────────── */
+html {
+  width: 100%;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
 body {
+  width: 100%;
+  overflow-x: hidden;
   font-family: 'Nunito', sans-serif;
   background: var(--creme);
   color: var(--texto);
-  min-height: 100vh;
-  padding-bottom: 100px; /* espaço para a float-bar */
+  min-height: 100dvh;
+  padding-bottom: 140px;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Títulos usam Oswald — forte e marcante como a logo */
+/* Títulos */
 h1, h2, h3, .header__brand-name {
   font-family: 'Oswald', sans-serif;
 }
 
-a { text-decoration: none; color: inherit; }
-button { cursor: pointer; font-family: 'Nunito', sans-serif; }
-img { display: block; max-width: 100%; }
+a {
+  text-decoration: none;
+  color: inherit;
+}
 
+button {
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
 
 /* ═══════════════════════════════════════════════════════════════
-   HEADER — barra superior fixa
-   → background: cor do marrom escuro (.marrom)
-   → Para mudar a altura: altere o padding
+   HEADER
    ═══════════════════════════════════════════════════════════════ */
 .header {
   position: sticky;
   top: 0;
   z-index: 90;
   background: var(--marrom);
-  border-bottom: 2px solid var(--dourado);  /* linha dourada embaixo */
-  box-shadow: 0 2px 20px rgba(0,0,0,0.35);
+  border-bottom: 2px solid var(--dourado);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.35);
 }
 
 .header__inner {
   max-width: 1100px;
   margin: 0 auto;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -88,26 +96,28 @@ img { display: block; max-width: 100%; }
   gap: 12px;
 }
 
-/* Link da marca (logo + nome) */
 .header__brand {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
+  flex: 1;
 }
 
-/* Logo no header — tamanho pequeno */
 .header__logo {
-  width: 50px;        /* ← altere para mudar o tamanho da logo no header */
+  width: 50px;
   height: 50px;
   border-radius: 10px;
   object-fit: cover;
   border: 2px solid var(--dourado);
+  flex-shrink: 0;
 }
 
 .header__brand-texts {
   display: flex;
   flex-direction: column;
   line-height: 1.2;
+  min-width: 0;
 }
 
 .header__brand-name {
@@ -125,7 +135,6 @@ img { display: block; max-width: 100%; }
   letter-spacing: 1px;
 }
 
-/* Botão do carrinho no header */
 .btn-header-cart {
   display: flex;
   align-items: center;
@@ -139,6 +148,7 @@ img { display: block; max-width: 100%; }
   font-weight: 800;
   transition: background .18s, transform .15s;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .btn-header-cart:hover {
@@ -146,11 +156,6 @@ img { display: block; max-width: 100%; }
   transform: scale(1.04);
 }
 
-.btn-header-cart__txt {
-  /* Oculta o texto em telas muito pequenas, mostra só o ícone e badge */
-}
-
-/* Badge de quantidade no botão do carrinho */
 .badge {
   background: var(--marrom);
   color: var(--dourado-claro);
@@ -165,20 +170,17 @@ img { display: block; max-width: 100%; }
   flex-shrink: 0;
 }
 
-
 /* ═══════════════════════════════════════════════════════════════
-   HERO — seção de destaque principal
-   → O gradiente imita as cores da logo (marrom → dourado)
-   → Para trocar a imagem de fundo: adicione background-image aqui
+   HERO
    ═══════════════════════════════════════════════════════════════ */
 .hero {
-  background: linear-gradient(160deg,
+  background: linear-gradient(
+    160deg,
     var(--marrom) 0%,
     var(--marrom-med) 45%,
     #6B3410 75%,
     #8B4A18 100%
   );
-  /* Textura sutil de grain — dá profundidade sem imagem */
   position: relative;
   overflow: hidden;
   padding: 48px 24px 52px;
@@ -186,7 +188,6 @@ img { display: block; max-width: 100%; }
   color: #fff;
 }
 
-/* Efeito de luz radial dourada no topo */
 .hero::before {
   content: '';
   position: absolute;
@@ -194,14 +195,14 @@ img { display: block; max-width: 100%; }
   left: 50%;
   transform: translateX(-50%);
   width: 500px;
+  max-width: 100%;
   height: 300px;
   background: radial-gradient(ellipse, rgba(212,146,10,.25) 0%, transparent 70%);
   pointer-events: none;
 }
 
-/* Logo grande no centro do hero */
 .hero__logo {
-  width: 150px;       /* ← altere para mudar tamanho da logo no hero */
+  width: 150px;
   height: 150px;
   object-fit: cover;
   border-radius: 20px;
@@ -210,7 +211,6 @@ img { display: block; max-width: 100%; }
   box-shadow: 0 8px 40px rgba(0,0,0,.45);
 }
 
-/* Etiqueta dourada acima do título */
 .hero__badge {
   display: inline-block;
   background: var(--dourado);
@@ -224,22 +224,19 @@ img { display: block; max-width: 100%; }
   text-transform: uppercase;
 }
 
-/* Título principal do hero */
 .hero__title {
   font-family: 'Oswald', sans-serif;
-  font-size: clamp(28px, 6vw, 52px);  /* tamanho responsivo */
+  font-size: clamp(28px, 6vw, 52px);
   font-weight: 700;
   line-height: 1.1;
   margin-bottom: 14px;
   text-shadow: 0 2px 8px rgba(0,0,0,.4);
 }
 
-/* Palavra em destaque dourada no título */
 .hero__title span {
   color: var(--dourado-claro);
 }
 
-/* Subtítulo do hero */
 .hero__desc {
   font-size: clamp(14px, 2.5vw, 17px);
   color: #E8D5B0;
@@ -249,7 +246,6 @@ img { display: block; max-width: 100%; }
   margin: 0 auto 28px;
 }
 
-/* Container dos chips de informação */
 .hero__chips {
   display: flex;
   flex-wrap: wrap;
@@ -261,7 +257,6 @@ img { display: block; max-width: 100%; }
   margin-right: auto;
 }
 
-/* Chip individual de informação (horário, retirada, etc.) */
 .info-chip {
   display: flex;
   align-items: center;
@@ -271,14 +266,19 @@ img { display: block; max-width: 100%; }
   border-radius: 12px;
   padding: 10px 16px;
   text-align: left;
+  min-width: 0;
 }
 
-.info-chip span { font-size: 20px; }
+.info-chip span {
+  font-size: 20px;
+  flex-shrink: 0;
+}
 
 .info-chip div {
   display: flex;
   flex-direction: column;
   gap: 1px;
+  min-width: 0;
 }
 
 .info-chip strong {
@@ -293,7 +293,6 @@ img { display: block; max-width: 100%; }
   color: #C8A56A;
 }
 
-/* Chips com cor diferente para variantes de aviso */
 .info-chip--alerta {
   border-color: rgba(255, 180, 50, .5);
   background: rgba(255, 160, 20, .12);
@@ -304,7 +303,6 @@ img { display: block; max-width: 100%; }
   background: rgba(255,255,255,.07);
 }
 
-/* Botão CTA do hero */
 .btn-cta {
   display: inline-block;
   background: var(--dourado);
@@ -326,17 +324,14 @@ img { display: block; max-width: 100%; }
   box-shadow: 0 8px 28px rgba(212,146,10,.5);
 }
 
-
 /* ═══════════════════════════════════════════════════════════════
    FILTRO DE CATEGORIAS
-   → Barra horizontal com scroll horizontal no mobile
-   → .ativa muda para fundo dourado
    ═══════════════════════════════════════════════════════════════ */
 .cat-nav {
   background: var(--marrom);
   border-bottom: 2px solid var(--dourado);
   position: sticky;
-  top: 70px; /* altura do header — ajuste se mudar o header */
+  top: 70px;
   z-index: 80;
 }
 
@@ -347,12 +342,15 @@ img { display: block; max-width: 100%; }
   gap: 6px;
   padding: 10px 16px;
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: none;
+  width: 100%;
 }
 
-.cat-nav__inner::-webkit-scrollbar { display: none; }
+.cat-nav__inner::-webkit-scrollbar {
+  display: none;
+}
 
-/* Botão de categoria */
 .cat-btn {
   flex-shrink: 0;
   display: flex;
@@ -375,14 +373,12 @@ img { display: block; max-width: 100%; }
   border-color: var(--dourado);
 }
 
-/* Estado ativo: fundo dourado sólido */
 .cat-btn.ativa {
   background: var(--dourado);
   color: var(--marrom);
   border-color: var(--dourado);
   font-weight: 800;
 }
-
 
 /* ═══════════════════════════════════════════════════════════════
    ÁREA DE PRODUTOS
@@ -391,9 +387,14 @@ img { display: block; max-width: 100%; }
   max-width: 1100px;
   margin: 0 auto;
   padding: 24px 16px 0;
+  width: 100%;
 }
 
-/* Título de seção (ex.: "🍞 Pães") */
+#produtosGrid {
+  width: 100%;
+  min-width: 0;
+}
+
 .secao-titulo {
   font-family: 'Oswald', sans-serif;
   font-size: 22px;
@@ -404,9 +405,9 @@ img { display: block; max-width: 100%; }
   align-items: center;
   gap: 10px;
   letter-spacing: .3px;
+  min-width: 0;
 }
 
-/* Linha decorativa após o título de seção */
 .secao-titulo::after {
   content: '';
   flex: 1;
@@ -415,17 +416,16 @@ img { display: block; max-width: 100%; }
   border-radius: 1px;
 }
 
-/* Grade responsiva de cards */
 .grid-produtos {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+  width: 100%;
+  min-width: 0;
 }
-
 
 /* ═══════════════════════════════════════════════════════════════
    CARD DE PRODUTO
-   → Cada produto vira um card com emoji, nome, preço e controle
    ═══════════════════════════════════════════════════════════════ */
 .card {
   background: var(--creme-card);
@@ -436,6 +436,9 @@ img { display: block; max-width: 100%; }
   display: flex;
   flex-direction: column;
   transition: transform .2s, box-shadow .2s;
+  min-width: 0;
+  width: 100%;
+  animation: fadeUp .35s ease both;
 }
 
 .card:hover {
@@ -443,10 +446,9 @@ img { display: block; max-width: 100%; }
   box-shadow: var(--sombra-hover);
 }
 
-/* Área da foto ou emoji do produto */
 .card__thumb {
   background: linear-gradient(135deg, #FFF5DC, #FFE8B0);
-  height: 110px;
+  height: 140px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -454,33 +456,22 @@ img { display: block; max-width: 100%; }
   position: relative;
   flex-shrink: 0;
   border-bottom: 2px solid var(--borda);
-  overflow: hidden;              /* garante que a foto não vaze fora do card */
+  overflow: hidden;
 }
 
-/*
- * FOTO DO PRODUTO
- * → Ocupa toda a área do card__thumb
- * → object-fit: cover = recorta a foto sem distorcer
- * → Para mudar a altura da foto: altere height em .card__thumb acima
- */
 .card__foto {
   width: 100%;
   height: 100%;
-  object-fit: cover;             /* preenche o espaço sem distorcer a imagem */
-  object-position: center;       /* centraliza o recorte — mude para "top" se preferir */
+  object-fit: cover;
+  object-position: center;
   display: block;
   transition: transform .3s ease;
 }
 
-/* Zoom suave na foto ao passar o mouse */
 .card:hover .card__foto {
   transform: scale(1.06);
 }
 
-/*
- * EMOJI DO PRODUTO (fallback quando não há foto)
- * → Exibido centralizado, igual ao comportamento anterior
- */
 .card__emoji {
   font-size: 54px;
   filter: drop-shadow(0 3px 6px rgba(0,0,0,.15));
@@ -490,7 +481,6 @@ img { display: block; max-width: 100%; }
   justify-content: center;
 }
 
-/* Badge "24h" para produtos com antecedência */
 .card__tag {
   position: absolute;
   top: 8px;
@@ -503,6 +493,7 @@ img { display: block; max-width: 100%; }
   border-radius: 6px;
   letter-spacing: .5px;
   text-transform: uppercase;
+  z-index: 2;
 }
 
 .card__body {
@@ -510,9 +501,9 @@ img { display: block; max-width: 100%; }
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
-/* Nome do produto */
 .card__nome {
   font-family: 'Oswald', sans-serif;
   font-size: 16px;
@@ -521,32 +512,36 @@ img { display: block; max-width: 100%; }
   margin-bottom: 4px;
   line-height: 1.3;
   letter-spacing: .2px;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
-/* Descrição curta do produto */
 .card__desc {
   font-size: 12px;
   color: var(--muted);
   line-height: 1.5;
   flex: 1;
   margin-bottom: 12px;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
-/* Linha inferior: preço + controle de quantidade */
 .card__rodape {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 8px;
+  min-width: 0;
 }
 
 .card__preco-wrap {
   display: flex;
   flex-direction: column;
   gap: 1px;
+  min-width: 0;
+  flex: 1;
 }
 
-/* Rótulo da unidade (ex.: "por pacote") */
 .card__unid {
   font-size: 10px;
   font-weight: 700;
@@ -555,19 +550,19 @@ img { display: block; max-width: 100%; }
   letter-spacing: .4px;
 }
 
-/* Preço em destaque dourado */
 .card__preco {
   font-family: 'Oswald', sans-serif;
   font-size: 20px;
   font-weight: 700;
   color: var(--dourado-esc);
+  overflow-wrap: break-word;
 }
 
-/* Controle de quantidade: [−] 0 [+] */
 .controle {
   display: flex;
   align-items: center;
   gap: 2px;
+  flex-shrink: 0;
 }
 
 .controle__btn {
@@ -592,7 +587,6 @@ img { display: block; max-width: 100%; }
   background: #FFF8E0;
 }
 
-/* Botão [+] com fundo dourado quando quantidade > 0 */
 .controle__btn--add {
   background: var(--dourado);
   border-color: var(--dourado);
@@ -605,7 +599,6 @@ img { display: block; max-width: 100%; }
   color: #fff;
 }
 
-/* Número da quantidade */
 .controle__num {
   min-width: 40px;
   text-align: center;
@@ -614,9 +607,8 @@ img { display: block; max-width: 100%; }
   color: var(--marrom);
 }
 
-
 /* ═══════════════════════════════════════════════════════════════
-   OVERLAY — fundo escuro ao abrir o carrinho
+   OVERLAY
    ═══════════════════════════════════════════════════════════════ */
 .overlay {
   position: fixed;
@@ -633,19 +625,16 @@ img { display: block; max-width: 100%; }
   pointer-events: all;
 }
 
-
 /* ═══════════════════════════════════════════════════════════════
-   CARRINHO LATERAL (drawer)
-   → Abre deslizando da direita
-   → .aberto muda right: 0 para revelar
+   CARRINHO LATERAL
    ═══════════════════════════════════════════════════════════════ */
 .cart-panel {
   position: fixed;
   top: 0;
-  right: -480px; /* ← largura negativa esconde o painel */
+  right: -480px;
   width: 420px;
   max-width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   background: var(--creme-card);
   z-index: 160;
   display: flex;
@@ -654,9 +643,10 @@ img { display: block; max-width: 100%; }
   box-shadow: -6px 0 48px rgba(20, 8, 0, .25);
 }
 
-.cart-panel.aberto { right: 0; }
+.cart-panel.aberto {
+  right: 0;
+}
 
-/* Cabeçalho do carrinho — fundo marrom */
 .cart-panel__head {
   background: var(--marrom);
   border-bottom: 2px solid var(--dourado);
@@ -689,16 +679,16 @@ img { display: block; max-width: 100%; }
   transition: background .15s;
 }
 
-.cart-panel__close:hover { background: rgba(255,255,255,.2); }
+.cart-panel__close:hover {
+  background: rgba(255,255,255,.2);
+}
 
-/* Corpo do carrinho — lista de itens */
 .cart-panel__body {
   flex: 1;
   overflow-y: auto;
   padding: 16px 20px;
 }
 
-/* Estado vazio do carrinho */
 .cart-vazio {
   text-align: center;
   padding: 56px 0;
@@ -723,7 +713,6 @@ img { display: block; max-width: 100%; }
   color: var(--muted);
 }
 
-/* Item individual no carrinho */
 .cart-item {
   display: flex;
   align-items: center;
@@ -739,7 +728,10 @@ img { display: block; max-width: 100%; }
   flex-shrink: 0;
 }
 
-.cart-item__info { flex: 1; min-width: 0; }
+.cart-item__info {
+  flex: 1;
+  min-width: 0;
+}
 
 .cart-item__nome {
   font-family: 'Oswald', sans-serif;
@@ -780,7 +772,6 @@ img { display: block; max-width: 100%; }
   background: #FEE;
 }
 
-/* Rodapé do carrinho: total + botão */
 .cart-panel__foot {
   padding: 16px 20px;
   border-top: 2px solid var(--borda);
@@ -808,7 +799,6 @@ img { display: block; max-width: 100%; }
   color: var(--marrom);
 }
 
-/* Botão de finalizar no carrinho */
 .btn-finalizar-cart {
   width: 100%;
   background: var(--marrom);
@@ -828,10 +818,8 @@ img { display: block; max-width: 100%; }
   color: var(--marrom);
 }
 
-
 /* ═══════════════════════════════════════════════════════════════
    MODAL DE FINALIZAÇÃO
-   → Aparece centralizado (desktop) ou vindo de baixo (mobile)
    ═══════════════════════════════════════════════════════════════ */
 .modal-bg {
   position: fixed;
@@ -839,7 +827,7 @@ img { display: block; max-width: 100%; }
   background: rgba(20, 8, 0, .6);
   z-index: 200;
   display: flex;
-  align-items: flex-end;   /* mobile: vem de baixo */
+  align-items: flex-end;
   justify-content: center;
   opacity: 0;
   pointer-events: none;
@@ -847,7 +835,9 @@ img { display: block; max-width: 100%; }
 }
 
 @media (min-width: 600px) {
-  .modal-bg { align-items: center; } /* desktop: centralizado */
+  .modal-bg {
+    align-items: center;
+  }
 }
 
 .modal-bg.aberto {
@@ -859,9 +849,9 @@ img { display: block; max-width: 100%; }
   background: #fff;
   width: 100%;
   max-width: 500px;
-  border-radius: 24px 24px 0 0;  /* arredondado no topo */
+  border-radius: 24px 24px 0 0;
   padding: 24px 24px 32px;
-  max-height: 92vh;
+  max-height: 92dvh;
   overflow-y: auto;
   transform: translateY(40px);
   transition: transform .3s cubic-bezier(.4, 0, .2, 1);
@@ -874,9 +864,10 @@ img { display: block; max-width: 100%; }
   }
 }
 
-.modal-bg.aberto .modal { transform: translateY(0); }
+.modal-bg.aberto .modal {
+  transform: translateY(0);
+}
 
-/* Alça de arrastar (visual, mobile) */
 .modal__alca {
   width: 40px;
   height: 4px;
@@ -885,9 +876,12 @@ img { display: block; max-width: 100%; }
   margin: 0 auto 20px;
 }
 
-@media (min-width: 600px) { .modal__alca { display: none; } }
+@media (min-width: 600px) {
+  .modal__alca {
+    display: none;
+  }
+}
 
-/* Cabeçalho do modal */
 .modal__cabecalho {
   display: flex;
   align-items: center;
@@ -918,7 +912,6 @@ img { display: block; max-width: 100%; }
   margin-top: 2px;
 }
 
-/* Aviso de sem entrega */
 .aviso-sem-entrega {
   background: #FFF8E0;
   border: 1.5px solid var(--dourado);
@@ -930,16 +923,11 @@ img { display: block; max-width: 100%; }
   margin-bottom: 18px;
 }
 
-/* Campos do formulário lado a lado */
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   margin-bottom: 14px;
-}
-
-@media (max-width: 420px) {
-  .form-row { grid-template-columns: 1fr; } /* empilha em telas pequenas */
 }
 
 .form-grupo {
@@ -949,8 +937,9 @@ img { display: block; max-width: 100%; }
   margin-bottom: 14px;
 }
 
-/* Quando form-grupo está dentro de form-row, não precisa margin extra */
-.form-row .form-grupo { margin-bottom: 0; }
+.form-row .form-grupo {
+  margin-bottom: 0;
+}
 
 .form-grupo label {
   font-size: 12px;
@@ -960,7 +949,6 @@ img { display: block; max-width: 100%; }
   letter-spacing: .4px;
 }
 
-/* Inputs, selects e textarea */
 .form-grupo input,
 .form-grupo select,
 .form-grupo textarea {
@@ -984,9 +972,11 @@ img { display: block; max-width: 100%; }
   background: #fff;
 }
 
-.form-grupo textarea { resize: vertical; min-height: 80px; }
+.form-grupo textarea {
+  resize: vertical;
+  min-height: 80px;
+}
 
-/* Aviso de horários */
 .aviso-horarios {
   background: #F9F6EF;
   border: 1.5px solid var(--borda);
@@ -998,9 +988,10 @@ img { display: block; max-width: 100%; }
   margin-bottom: 16px;
 }
 
-.aviso-horarios strong { color: var(--marrom); }
+.aviso-horarios strong {
+  color: var(--marrom);
+}
 
-/* Caixa de prévia da mensagem WhatsApp */
 .preview-msg {
   background: #F0F9F0;
   border: 1.5px solid #A8D8A0;
@@ -1029,7 +1020,6 @@ img { display: block; max-width: 100%; }
   overflow-y: auto;
 }
 
-/* Mensagem de erro/validação */
 .msg-status {
   min-height: 18px;
   text-align: center;
@@ -1039,7 +1029,6 @@ img { display: block; max-width: 100%; }
   margin-bottom: 12px;
 }
 
-/* Botão WhatsApp verde */
 .btn-wpp {
   width: 100%;
   background: var(--verde-wpp);
@@ -1064,10 +1053,8 @@ img { display: block; max-width: 100%; }
   transform: scale(1.02);
 }
 
-
 /* ═══════════════════════════════════════════════════════════════
-   BARRA FLUTUANTE — aparece quando há itens no carrinho
-   → Ótima para conversão no mobile
+   BARRA FLUTUANTE
    ═══════════════════════════════════════════════════════════════ */
 .float-bar {
   position: fixed;
@@ -1077,23 +1064,25 @@ img { display: block; max-width: 100%; }
   z-index: 140;
   background: var(--marrom);
   border-top: 2px solid var(--dourado);
-  padding: 12px 20px;
+  padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
   display: flex;
   align-items: center;
   gap: 12px;
-  transform: translateY(100%);  /* ← escondida por padrão */
+  transform: translateY(100%);
   transition: transform .3s cubic-bezier(.4, 0, .2, 1);
   box-shadow: 0 -4px 24px rgba(0,0,0,.25);
 }
 
-/* .visivel é adicionada pelo JS quando há itens */
-.float-bar.visivel { transform: translateY(0); }
+.float-bar.visivel {
+  transform: translateY(0);
+}
 
 .float-bar__info {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 1px;
+  min-width: 0;
 }
 
 .float-bar__info span {
@@ -1123,17 +1112,19 @@ img { display: block; max-width: 100%; }
   letter-spacing: .3px;
   white-space: nowrap;
   transition: background .18s;
+  flex-shrink: 0;
 }
 
-.float-bar__btn:hover { background: var(--dourado-claro); }
-
+.float-bar__btn:hover {
+  background: var(--dourado-claro);
+}
 
 /* ═══════════════════════════════════════════════════════════════
-   TOAST — notificação rápida
+   TOAST
    ═══════════════════════════════════════════════════════════════ */
 .toast {
   position: fixed;
-  bottom: 80px;
+  bottom: 92px;
   left: 50%;
   transform: translateX(-50%) translateY(20px);
   background: var(--marrom);
@@ -1149,13 +1140,15 @@ img { display: block; max-width: 100%; }
   transition: opacity .25s, transform .25s;
   white-space: nowrap;
   box-shadow: 0 4px 20px rgba(0,0,0,.3);
+  max-width: calc(100vw - 24px);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .toast.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
-
 
 /* ═══════════════════════════════════════════════════════════════
    RODAPÉ
@@ -1205,39 +1198,198 @@ img { display: block; max-width: 100%; }
   font-weight: 600;
 }
 
-
 /* ═══════════════════════════════════════════════════════════════
    RESPONSIVIDADE GERAL
    ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .header__inner {
+    padding: 10px 14px;
+  }
 
-/* Tablet — 2 cards por linha em grades menores */
+  .hero {
+    padding: 36px 16px 42px;
+  }
+
+  .produtos-wrap {
+    padding: 20px 12px 0;
+  }
+
+  .grid-produtos {
+    gap: 12px;
+  }
+
+  .card__thumb {
+    height: 130px;
+  }
+}
+
 @media (max-width: 600px) {
   .grid-produtos {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
   }
 
-  .card__thumb { height: 90px; font-size: 40px; }
-  .card__nome  { font-size: 14px; }
-  .card__preco { font-size: 17px; }
+  .card__thumb {
+    height: 110px;
+    font-size: 40px;
+  }
 
-  /* Esconde texto do botão do header em telas pequenas */
-  .btn-header-cart__txt { display: none; }
+  .card__nome {
+    font-size: 14px;
+  }
+
+  .card__preco {
+    font-size: 17px;
+  }
+
+  .btn-header-cart__txt {
+    display: none;
+  }
+
+  .float-bar {
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  }
+
+  .float-bar__btn {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
 }
 
-/* Mobile pequeno — 1 card por linha */
-@media (max-width: 380px) {
-  .grid-produtos { grid-template-columns: 1fr; }
+@media (max-width: 480px) {
+  .header__inner {
+    gap: 8px;
+  }
 
-  .hero__logo { width: 120px; height: 120px; }
+  .header__brand-name {
+    font-size: 16px;
+  }
+
+  .header__brand-sub {
+    font-size: 9px;
+    letter-spacing: .8px;
+  }
+
+  .hero__logo {
+    width: 126px;
+    height: 126px;
+  }
+
+  .hero__chips {
+    gap: 8px;
+  }
+
+  .info-chip {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .card__body {
+    padding: 12px;
+  }
+
+  .card__rodape {
+    align-items: center;
+  }
+
+  .controle__btn {
+    width: 30px;
+    height: 30px;
+  }
+
+  .controle__num {
+    min-width: 28px;
+    font-size: 14px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .modal {
+    padding: 20px 16px 26px;
+  }
 }
 
-/* Animação de entrada dos cards (opcional — pode remover) */
+@media (max-width: 420px) {
+  body {
+    padding-bottom: 150px;
+  }
+
+  .produtos-wrap {
+    padding: 18px 10px 0;
+  }
+
+  .grid-produtos {
+    gap: 10px;
+  }
+
+  .card__thumb {
+    height: 100px;
+  }
+
+  .card__nome {
+    font-size: 13px;
+  }
+
+  .card__desc {
+    font-size: 11px;
+  }
+
+  .card__unid {
+    font-size: 9px;
+  }
+
+  .card__preco {
+    font-size: 15px;
+  }
+
+  .secao-titulo {
+    font-size: 20px;
+  }
+
+  .float-bar__info strong {
+    font-size: 18px;
+  }
+
+  .float-bar__btn {
+    padding: 11px 14px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 360px) {
+  .grid-produtos {
+    grid-template-columns: 1fr;
+  }
+
+  .hero__logo {
+    width: 120px;
+    height: 120px;
+  }
+
+  .header__brand-sub {
+    display: none;
+  }
+
+  .float-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .float-bar__btn {
+    width: 100%;
+  }
+}
+
+/* Animação */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.card {
-  animation: fadeUp .35s ease both;
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
