@@ -257,15 +257,20 @@ function gerarCardHtml(p) {
         ${thumbHtml}
         ${p.antecedencia ? '<span class="card__tag">24h</span>' : ""}
       </div>
+
       <div class="card__body">
         <div class="card__nome">${p.nome}</div>
         <div class="card__desc">${p.desc}</div>
         ${infoMinima}
+
         <div class="card__rodape">
           <div class="card__preco-wrap">
             <span class="card__unid">${unidLabel}</span>
             <span class="card__preco">${fmt(p.preco)}</span>
           </div>
+        </div>
+
+        <div class="card__acoes">
           <div class="controle">
             <button class="controle__btn" onclick="mudaQuantidade(${p.id}, -1)" aria-label="Diminuir">−</button>
             <span class="controle__num" id="qty${p.id}">${qty}</span>
@@ -313,8 +318,7 @@ function mudaQuantidade(id, delta) {
     delete carrinho[id];
   }
 
-  const numEl = document.getElementById("qty" + id);
-  if (numEl) numEl.textContent = carrinho[id] || 0;
+  renderizarProdutos();
 
   if (delta > 0) {
     if (produto.qtdMinima && qtdAtual === 0) {
@@ -329,8 +333,7 @@ function mudaQuantidade(id, delta) {
 
 function removerItem(id) {
   delete carrinho[id];
-  const numEl = document.getElementById("qty" + id);
-  if (numEl) numEl.textContent = "0";
+  renderizarProdutos();
   atualizarUI();
 }
 
