@@ -16,11 +16,6 @@
    ① CONFIGURAÇÃO — altere aqui sem precisar mexer no resto
    ═══════════════════════════════════════════════════════════════ */
 
-/**
- * Número do WhatsApp que receberá os pedidos.
- * Formato: código do país (55) + DDD + número, sem espaços ou símbolos.
- * → Para mudar: substitua apenas os dígitos dentro das aspas.
- */
 const WHATSAPP_NUMERO = "552433266628";
 
 /**
@@ -81,15 +76,15 @@ const produtos = [
     foto: "pao-sal.jpeg"
   },
   {
-  id: 10,
-  nome: "Rosca Salgada",
-  desc: "Rosca salgada recheada com presunto, queijo e maionese, feita no dia para garantir sabor e maciez. Ideal para café e lanche.",
-  preco: 19.00,
-  cat: "paes",
-  emoji: "🥨",
-  unid: "unidade",
-  foto: "rosca.jpeg"
-},
+    id: 10,
+    nome: "Rosca Salgada",
+    desc: "Rosca salgada recheada com presunto, queijo e maionese, feita no dia para garantir sabor e maciez. Ideal para café e lanche.",
+    preco: 19.00,
+    cat: "paes",
+    emoji: "🥨",
+    unid: "unidade",
+    foto: "rosca.jpeg"
+  },
   {
     id: 6,
     nome: "torta de limão",
@@ -126,7 +121,7 @@ const produtos = [
 
 /* Nomes de exibição para cada categoria — aparece como título de seção */
 const catNomes = {
-  paes:  "🍞 Pães",
+  paes: "🍞 Pães",
   bolos: "🎂 Bolos & Tortas",
   doces: "🍮 Doces & Confeitaria"
 };
@@ -207,9 +202,6 @@ function getLabelUnidade(unid) {
 }
 
 function getTextoQuantidade(produto, quantidade) {
-  if (produto.unid === "unidade") return `${quantidade} un.`;
-  if (produto.unid === "pacote") return `${quantidade}x`;
-  if (produto.unid === "cento") return `${quantidade}x`;
   if (produto.unid === "kg") return `${quantidade} kg`;
   return `${quantidade}x`;
 }
@@ -354,11 +346,11 @@ function atualizarUI() {
   document.getElementById("headerBadge").textContent = qty;
 
   const floatBar = document.getElementById("floatBar");
-  document.getElementById("fbQtd").textContent  = `${qty} ${qty === 1 ? "item" : "itens"}`;
+  document.getElementById("fbQtd").textContent = `${qty} ${qty === 1 ? "item" : "itens"}`;
   document.getElementById("fbTotal").textContent = fmt(val);
   floatBar.classList.toggle("visivel", qty > 0);
 
-  const body   = document.getElementById("cartBody");
+  const body = document.getElementById("cartBody");
   const footer = document.getElementById("cartFooter");
 
   if (qty === 0) {
@@ -386,7 +378,7 @@ function atualizarUI() {
           <span class="cart-item__emoji">${p.emoji}</span>
           <div class="cart-item__info">
             <div class="cart-item__nome">${p.nome}</div>
-            <div class="cart-item__sub">${textoQuantidade} ${p.unid === "unidade" ? `× ${fmt(p.preco)}` : fmt(p.preco)}</div>
+            <div class="cart-item__sub">${textoQuantidade} ${p.unid === "kg" ? fmt(p.preco) : `× ${fmt(p.preco)}`}</div>
           </div>
           <span class="cart-item__preco">${fmt(subtotal)}</span>
           <button class="cart-item__remover" onclick="removerItem(${id})" aria-label="Remover ${p.nome}">🗑</button>
@@ -442,7 +434,7 @@ function fecharModalFora(event) {
 
 function preencherHorarios() {
   const dataVal = document.getElementById("inData").value;
-  const select  = document.getElementById("inHora");
+  const select = document.getElementById("inHora");
   select.innerHTML = "";
 
   if (!dataVal) {
@@ -453,16 +445,16 @@ function preencherHorarios() {
 
   const [ano, mes, dia] = dataVal.split("-").map(Number);
   const dataSelecionada = new Date(ano, mes - 1, dia);
-  const diaSemana       = dataSelecionada.getDay();
-  const agora           = new Date();
+  const diaSemana = dataSelecionada.getDay();
+  const agora = new Date();
 
   const isHoje =
     dataSelecionada.getFullYear() === agora.getFullYear() &&
-    dataSelecionada.getMonth()    === agora.getMonth() &&
-    dataSelecionada.getDate()     === agora.getDate();
+    dataSelecionada.getMonth() === agora.getMonth() &&
+    dataSelecionada.getDate() === agora.getDate();
 
   const horaInicio = 6;
-  const horaFim    = diaSemana === 0 ? 12 : 21;
+  const horaFim = diaSemana === 0 ? 12 : 21;
 
   const opcoesHorario = [];
 
@@ -505,22 +497,17 @@ function gerarMensagem() {
       const p = buscarProduto(id);
       const quantidade = carrinho[id];
       const subtotal = p.preco * quantidade;
-
-      if (p.unid === "unidade") {
-        return `• ${p.nome}: ${quantidade} unidades — ${fmt(subtotal)}`;
-      }
-
       return `• ${quantidade}x ${p.nome} — ${fmt(subtotal)}`;
     })
     .join("\n");
 
   const nome = document.getElementById("inNome")?.value.trim() || "-";
-  const tel  = document.getElementById("inTel")?.value.trim()  || "-";
-  const obs  = document.getElementById("inObs")?.value.trim()  || "-";
-  const hora = document.getElementById("inHora")?.value        || "-";
+  const tel = document.getElementById("inTel")?.value.trim() || "-";
+  const obs = document.getElementById("inObs")?.value.trim() || "-";
+  const hora = document.getElementById("inHora")?.value || "-";
 
   const dataRaw = document.getElementById("inData")?.value || "";
-  const data    = fmtData(dataRaw);
+  const data = fmtData(dataRaw);
 
   return `🥐 *ENCOMENDA — Padaria Bom Pastor*
 
@@ -551,10 +538,10 @@ function atualizarPreview() {
    ═══════════════════════════════════════════════════════════════ */
 
 function enviarWhatsApp() {
-  const nome   = document.getElementById("inNome").value.trim();
-  const tel    = document.getElementById("inTel").value.trim();
-  const data   = document.getElementById("inData").value;
-  const hora   = document.getElementById("inHora").value;
+  const nome = document.getElementById("inNome").value.trim();
+  const tel = document.getElementById("inTel").value.trim();
+  const data = document.getElementById("inData").value;
+  const hora = document.getElementById("inHora").value;
   const status = document.getElementById("statusMsg");
 
   status.textContent = "";
@@ -644,9 +631,9 @@ document.getElementById("inHora")?.addEventListener("change", atualizarPreview);
 
 function definirDataMinima() {
   const hoje = new Date();
-  const ano  = hoje.getFullYear();
-  const mes  = String(hoje.getMonth() + 1).padStart(2, "0");
-  const dia  = String(hoje.getDate()).padStart(2, "0");
+  const ano = hoje.getFullYear();
+  const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+  const dia = String(hoje.getDate()).padStart(2, "0");
   document.getElementById("inData").min = `${ano}-${mes}-${dia}`;
 }
 
