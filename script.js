@@ -2,25 +2,16 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║           PADARIA BOM PASTOR — script.js                      ║
   ╠═══════════════════════════════════════════════════════════════╣
-  ║  Este arquivo controla toda a lógica do site:                 ║
-  ║  • Listagem e filtragem de produtos                           ║
-  ║  • Carrinho (adicionar, remover, calcular total)              ║
-  ║  • Modal de checkout com formulário                           ║
-  ║  • Geração da mensagem e envio para o WhatsApp                ║
-  ║  • Horários de atendimento dinâmicos                          ║
+  ║  Ajustado para:                                               ║
+  ║  • manter cards funcionando                                   ║
+  ║  • melhorar carregamento das imagens                          ║
+  ║  • evitar piscada ao clicar em + ou -                         ║
+  ║  • manter carrinho, checkout e WhatsApp                        ║
   ╚═══════════════════════════════════════════════════════════════╝
 */
 
-
-/* ═══════════════════════════════════════════════════════════════
-   ① CONFIGURAÇÃO — altere aqui sem precisar mexer no resto
-   ═══════════════════════════════════════════════════════════════ */
-
 const WHATSAPP_NUMERO = "552433266628";
 
-/**
- * CARDÁPIO — lista de produtos disponíveis para encomenda.
- */
 const produtos = [
   {
     id: 1,
@@ -30,7 +21,8 @@ const produtos = [
     cat: "paes",
     emoji: "🥖",
     unid: "pacote",
-    foto: "cachorro.jpeg"
+    foto: "cachorro.jpeg",
+    fotoPos: "center"
   },
   {
     id: 2,
@@ -40,7 +32,8 @@ const produtos = [
     cat: "paes",
     emoji: "🍔",
     unid: "pacote",
-    foto: "hamburguer.jpeg"
+    foto: "hamburguer.jpeg",
+    fotoPos: "center"
   },
   {
     id: 3,
@@ -50,7 +43,8 @@ const produtos = [
     cat: "paes",
     emoji: "🌭",
     unid: "pacote",
-    foto: "hotdog.jpeg"
+    foto: "hotdog.jpeg",
+    fotoPos: "center"
   },
   {
     id: 4,
@@ -62,7 +56,8 @@ const produtos = [
     unid: "unidade",
     qtdMinima: 50,
     antecedencia: true,
-    foto: "mini.png"
+    foto: "mini.png",
+    fotoPos: "center"
   },
   {
     id: 5,
@@ -73,7 +68,8 @@ const produtos = [
     emoji: "🍞",
     unid: "unidade",
     qtdMinima: 50,
-    foto: "pao-sal.jpeg"
+    foto: "pao-sal.jpeg",
+    fotoPos: "center"
   },
   {
     id: 10,
@@ -83,64 +79,60 @@ const produtos = [
     cat: "paes",
     emoji: "🥨",
     unid: "unidade",
-    foto: "rosca.jpeg"
+    foto: "rosca.jpeg",
+    fotoPos: "center"
   },
   {
     id: 6,
-    nome: "torta de limão",
-    desc: "torta inteira sob encomenda. Cobertura cremosa de musse de limão.",
+    nome: "Torta de Limão",
+    desc: "Torta inteira sob encomenda. Cobertura cremosa de mousse de limão.",
     preco: 100.00,
     cat: "bolos",
     emoji: "🎂",
     unid: "unidade",
-    foto: "torta.jpeg"
+    foto: "torta.jpeg",
+    fotoPos: "center"
   },
   {
     id: 8,
-    nome: "Pudim de leite condensado",
+    nome: "Pudim de Leite Condensado",
     desc: "Pudim inteiro sob encomenda. Pedir com 24h de antecedência.",
     preco: 40.00,
     cat: "doces",
     emoji: "🍮",
     unid: "unidade",
     antecedencia: true,
-    foto: "pudim.jpeg"
+    foto: "pudim.jpeg",
+    fotoPos: "center"
   },
   {
     id: 9,
-    nome: "Pudim de creme",
+    nome: "Pudim de Creme",
     desc: "Pudim inteiro sob encomenda. Pedir com 24h de antecedência.",
     preco: 40.00,
     cat: "doces",
     emoji: "🍮",
     unid: "unidade",
     antecedencia: true,
-    foto: "pudim2.jpeg"
+    foto: "pudim2.jpeg",
+    fotoPos: "center"
   }
 ];
 
-/* Nomes de exibição para cada categoria — aparece como título de seção */
 const catNomes = {
   paes: "🍞 Pães",
   bolos: "🎂 Bolos & Tortas",
   doces: "🍮 Doces & Confeitaria"
 };
 
-
-/* ═══════════════════════════════════════════════════════════════
-   ② ESTADO DA APLICAÇÃO
-   ═══════════════════════════════════════════════════════════════ */
-
 let carrinho = {};
 let catAtual = "todos";
 
-
-/* ═══════════════════════════════════════════════════════════════
-   ③ UTILITÁRIOS
-   ═══════════════════════════════════════════════════════════════ */
-
 function fmt(valor) {
-  return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  return valor.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  });
 }
 
 function fmtTelefone(valor) {
@@ -206,10 +198,15 @@ function getTextoQuantidade(produto, quantidade) {
   return `${quantidade}x`;
 }
 
-
-/* ═══════════════════════════════════════════════════════════════
-   ④ RENDERIZAÇÃO DOS PRODUTOS
-   ═══════════════════════════════════════════════════════════════ */
+function gerarClasseProduto(nome) {
+  return nome
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ç/g, "c")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
 
 function renderizarProdutos() {
   const grid = document.getElementById("produtosGrid");
@@ -222,6 +219,7 @@ function renderizarProdutos() {
 
   if (catAtual === "todos") {
     const categorias = [...new Set(lista.map(p => p.cat))];
+
     categorias.forEach(cat => {
       const itens = lista.filter(p => p.cat === cat);
       html += `<h2 class="secao-titulo">${catNomes[cat] || cat}</h2>`;
@@ -237,22 +235,26 @@ function renderizarProdutos() {
 function gerarCardHtml(p) {
   const qty = carrinho[p.id] || 0;
   const unidLabel = getLabelUnidade(p.unid);
+  const classeProduto = gerarClasseProduto(p.nome);
 
   const infoMinima = p.qtdMinima
-    ? `<div class="card__desc" style="margin-top:-6px; margin-bottom:10px; color:#A97208; font-weight:800;">Pedido mínimo: ${p.qtdMinima} unidades</div>`
+    ? `<div class="card__desc card__desc--minimo">Pedido mínimo: ${p.qtdMinima} unidades</div>`
     : "";
 
   const thumbHtml = p.foto
     ? `<img
          src="${p.foto}"
          alt="${p.nome}"
-         class="card__foto"
+         class="card__foto card__foto--${p.cat} card__foto--${classeProduto}"
+         style="object-position:${p.fotoPos || "center"};"
+         loading="lazy"
+         decoding="async"
          onerror="fotoFallback(this, '${p.emoji}')"
        />`
     : `<span class="card__emoji">${p.emoji}</span>`;
 
   return `
-    <div class="card">
+    <div class="card card--${p.cat}">
       <div class="card__thumb">
         ${thumbHtml}
         ${p.antecedencia ? '<span class="card__tag">24h</span>' : ""}
@@ -272,9 +274,9 @@ function gerarCardHtml(p) {
 
         <div class="card__acoes">
           <div class="controle">
-            <button class="controle__btn" onclick="mudaQuantidade(${p.id}, -1)" aria-label="Diminuir">−</button>
+            <button class="controle__btn" type="button" onclick="mudaQuantidade(${p.id}, -1)" aria-label="Diminuir ${p.nome}">−</button>
             <span class="controle__num" id="qty${p.id}">${qty}</span>
-            <button class="controle__btn controle__btn--add" onclick="mudaQuantidade(${p.id}, 1)" aria-label="Adicionar">+</button>
+            <button class="controle__btn controle__btn--add" type="button" onclick="mudaQuantidade(${p.id}, 1)" aria-label="Adicionar ${p.nome}">+</button>
           </div>
         </div>
       </div>
@@ -289,10 +291,12 @@ function fotoFallback(imgEl, emoji) {
   imgEl.replaceWith(span);
 }
 
-
-/* ═══════════════════════════════════════════════════════════════
-   ⑤ LÓGICA DO CARRINHO
-   ═══════════════════════════════════════════════════════════════ */
+function atualizarQuantidadeVisual(id) {
+  const qtyEl = document.getElementById(`qty${id}`);
+  if (qtyEl) {
+    qtyEl.textContent = carrinho[id] || 0;
+  }
+}
 
 function mudaQuantidade(id, delta) {
   const produto = buscarProduto(id);
@@ -318,7 +322,7 @@ function mudaQuantidade(id, delta) {
     delete carrinho[id];
   }
 
-  renderizarProdutos();
+  atualizarQuantidadeVisual(id);
 
   if (delta > 0) {
     if (produto.qtdMinima && qtdAtual === 0) {
@@ -333,14 +337,9 @@ function mudaQuantidade(id, delta) {
 
 function removerItem(id) {
   delete carrinho[id];
-  renderizarProdutos();
+  atualizarQuantidadeVisual(id);
   atualizarUI();
 }
-
-
-/* ═══════════════════════════════════════════════════════════════
-   ⑥ ATUALIZAÇÃO GERAL DA INTERFACE
-   ═══════════════════════════════════════════════════════════════ */
 
 function atualizarUI() {
   const qty = totalQuantidade();
@@ -384,18 +383,13 @@ function atualizarUI() {
             <div class="cart-item__sub">${textoQuantidade} ${p.unid === "kg" ? fmt(p.preco) : `× ${fmt(p.preco)}`}</div>
           </div>
           <span class="cart-item__preco">${fmt(subtotal)}</span>
-          <button class="cart-item__remover" onclick="removerItem(${id})" aria-label="Remover ${p.nome}">🗑</button>
+          <button class="cart-item__remover" type="button" onclick="removerItem(${id})" aria-label="Remover ${p.nome}">🗑</button>
         </div>`;
     }).join("");
   }
 
   atualizarPreview();
 }
-
-
-/* ═══════════════════════════════════════════════════════════════
-   ⑦ CARRINHO LATERAL — abrir / fechar
-   ═══════════════════════════════════════════════════════════════ */
 
 function abrirCarrinho() {
   document.getElementById("cartPanel").classList.add("aberto");
@@ -408,11 +402,6 @@ function fecharCarrinho() {
   document.getElementById("overlay").classList.remove("aberto");
   document.body.style.overflow = "";
 }
-
-
-/* ═══════════════════════════════════════════════════════════════
-   ⑧ MODAL DE CHECKOUT — abrir / fechar
-   ═══════════════════════════════════════════════════════════════ */
 
 function abrirModal() {
   fecharCarrinho();
@@ -429,11 +418,6 @@ function fecharModal() {
 function fecharModalFora(event) {
   if (event.target === document.getElementById("modalBg")) fecharModal();
 }
-
-
-/* ═══════════════════════════════════════════════════════════════
-   ⑨ HORÁRIOS DE ATENDIMENTO
-   ═══════════════════════════════════════════════════════════════ */
 
 function preencherHorarios() {
   const dataVal = document.getElementById("inData").value;
@@ -485,11 +469,6 @@ function preencherHorarios() {
   atualizarPreview();
 }
 
-
-/* ═══════════════════════════════════════════════════════════════
-   ⑩ GERAÇÃO E PRÉVIA DA MENSAGEM WHATSAPP
-   ═══════════════════════════════════════════════════════════════ */
-
 function gerarMensagem() {
   if (!Object.keys(carrinho).length) {
     return "Adicione produtos ao pedido para ver a prévia aqui.";
@@ -535,11 +514,6 @@ function atualizarPreview() {
   if (el) el.textContent = gerarMensagem();
 }
 
-
-/* ═══════════════════════════════════════════════════════════════
-   ⑪ VALIDAÇÃO E ENVIO PARA O WHATSAPP
-   ═══════════════════════════════════════════════════════════════ */
-
 function enviarWhatsApp() {
   const nome = document.getElementById("inNome").value.trim();
   const tel = document.getElementById("inTel").value.trim();
@@ -582,37 +556,26 @@ function enviarWhatsApp() {
   window.open(url, "_blank");
 }
 
-
-/* ═══════════════════════════════════════════════════════════════
-   ⑫ TOAST — notificação rápida
-   ═══════════════════════════════════════════════════════════════ */
-
 function mostrarToast(mensagem) {
   const el = document.getElementById("toast");
   el.textContent = mensagem;
   el.classList.add("show");
+
   clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(() => el.classList.remove("show"), 1800);
+  window._toastTimer = setTimeout(() => {
+    el.classList.remove("show");
+  }, 1800);
 }
-
-
-/* ═══════════════════════════════════════════════════════════════
-   ⑬ FILTRO DE CATEGORIAS
-   ═══════════════════════════════════════════════════════════════ */
 
 document.querySelectorAll(".cat-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("ativa"));
     btn.classList.add("ativa");
+
     catAtual = btn.dataset.cat;
     renderizarProdutos();
   });
 });
-
-
-/* ═══════════════════════════════════════════════════════════════
-   ⑭ EVENTOS DO FORMULÁRIO
-   ═══════════════════════════════════════════════════════════════ */
 
 document.getElementById("inTel").addEventListener("input", e => {
   e.target.value = fmtTelefone(e.target.value);
@@ -627,16 +590,12 @@ document.getElementById("inData").addEventListener("change", preencherHorarios);
 
 document.getElementById("inHora")?.addEventListener("change", atualizarPreview);
 
-
-/* ═══════════════════════════════════════════════════════════════
-   ⑮ INICIALIZAÇÃO
-   ═══════════════════════════════════════════════════════════════ */
-
 function definirDataMinima() {
   const hoje = new Date();
   const ano = hoje.getFullYear();
   const mes = String(hoje.getMonth() + 1).padStart(2, "0");
   const dia = String(hoje.getDate()).padStart(2, "0");
+
   document.getElementById("inData").min = `${ano}-${mes}-${dia}`;
 }
 

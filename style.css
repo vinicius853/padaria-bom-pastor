@@ -2,13 +2,12 @@
   ╔═══════════════════════════════════════════════════════════════╗
   ║           PADARIA BOM PASTOR — style.css                      ║
   ╠═══════════════════════════════════════════════════════════════╣
-  ║  Versão corrigida sem quebrar a estrutura original            ║
+  ║  Versão ajustada                                              ║
   ║  Ajustes:                                                     ║
-  ║  - responsividade real                                        ║
-  ║  - sem corte lateral                                          ║
-  ║  - preço não quebra linha                                     ║
-  ║  - barra inferior com espaço correto                          ║
-  ║  - controles abaixo do preço                                  ║
+  ║  - imagens enquadradas corretamente                           ║
+  ║  - cards com visual mais uniforme                             ║
+  ║  - object-fit profissional estilo app/iFood                   ║
+  ║  - responsividade mantida                                     ║
   ╚═══════════════════════════════════════════════════════════════╝
 */
 
@@ -57,14 +56,17 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Títulos usam Oswald */
 h1, h2, h3, .header__brand-name {
   font-family: 'Oswald', sans-serif;
 }
 
 a { text-decoration: none; color: inherit; }
 button { cursor: pointer; font-family: 'Nunito', sans-serif; }
-img { display: block; max-width: 100%; }
+
+img {
+  display: block;
+  max-width: 100%;
+}
 
 /* ═══════════════════════════════════════════════════════════════
    HEADER
@@ -102,6 +104,7 @@ img { display: block; max-width: 100%; }
   height: 50px;
   border-radius: 10px;
   object-fit: cover;
+  object-position: center;
   border: 2px solid var(--dourado);
   flex-shrink: 0;
 }
@@ -196,6 +199,7 @@ img { display: block; max-width: 100%; }
   width: 150px;
   height: 150px;
   object-fit: cover;
+  object-position: center;
   border-radius: 20px;
   border: 3px solid var(--dourado);
   margin: 0 auto 20px;
@@ -260,7 +264,10 @@ img { display: block; max-width: 100%; }
   max-width: 100%;
 }
 
-.info-chip span { font-size: 20px; flex-shrink: 0; }
+.info-chip span {
+  font-size: 20px;
+  flex-shrink: 0;
+}
 
 .info-chip div {
   display: flex;
@@ -335,7 +342,9 @@ img { display: block; max-width: 100%; }
   width: 100%;
 }
 
-.cat-nav__inner::-webkit-scrollbar { display: none; }
+.cat-nav__inner::-webkit-scrollbar {
+  display: none;
+}
 
 .cat-btn {
   flex-shrink: 0;
@@ -423,6 +432,7 @@ img { display: block; max-width: 100%; }
   transition: transform .2s, box-shadow .2s;
   min-width: 0;
   width: 100%;
+  animation: fadeUp .35s ease both;
 }
 
 .card:hover {
@@ -430,9 +440,12 @@ img { display: block; max-width: 100%; }
   box-shadow: var(--sombra-hover);
 }
 
+/* ÁREA DA IMAGEM AJUSTADA */
 .card__thumb {
+  width: 100%;
+  height: 190px;
+  aspect-ratio: 16 / 9;
   background: linear-gradient(135deg, #FFF5DC, #FFE8B0);
-  height: 140px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -443,17 +456,30 @@ img { display: block; max-width: 100%; }
   overflow: hidden;
 }
 
+/* IMAGEM DO PRODUTO AJUSTADA */
 .card__foto {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center center;
   display: block;
-  transition: transform .3s ease;
+  transition: transform .35s ease, filter .35s ease;
+}
+
+/* Evita cortes muito ruins em imagens horizontais */
+.card__foto[src*="pao"],
+.card__foto[src*="Pao"],
+.card__foto[src*="pão"],
+.card__foto[src*="hamburguer"],
+.card__foto[src*="hot"],
+.card__foto[src*="rosca"],
+.card__foto[src*="torta"] {
+  object-position: center center;
 }
 
 .card:hover .card__foto {
-  transform: scale(1.06);
+  transform: scale(1.04);
+  filter: brightness(1.03);
 }
 
 .card__emoji {
@@ -477,6 +503,7 @@ img { display: block; max-width: 100%; }
   border-radius: 6px;
   letter-spacing: .5px;
   text-transform: uppercase;
+  z-index: 2;
 }
 
 .card__body {
@@ -541,7 +568,6 @@ img { display: block; max-width: 100%; }
   line-height: 1;
 }
 
-/* NOVO: ações abaixo do preço */
 .card__acoes {
   margin-top: 10px;
   display: flex;
@@ -633,7 +659,9 @@ img { display: block; max-width: 100%; }
   box-shadow: -6px 0 48px rgba(20, 8, 0, .25);
 }
 
-.cart-panel.aberto { right: 0; }
+.cart-panel.aberto {
+  right: 0;
+}
 
 .cart-panel__head {
   background: var(--marrom);
@@ -666,7 +694,9 @@ img { display: block; max-width: 100%; }
   transition: background .15s;
 }
 
-.cart-panel__close:hover { background: rgba(255,255,255,.2); }
+.cart-panel__close:hover {
+  background: rgba(255,255,255,.2);
+}
 
 .cart-panel__body {
   flex: 1;
@@ -713,7 +743,10 @@ img { display: block; max-width: 100%; }
   flex-shrink: 0;
 }
 
-.cart-item__info { flex: 1; min-width: 0; }
+.cart-item__info {
+  flex: 1;
+  min-width: 0;
+}
 
 .cart-item__nome {
   font-family: 'Oswald', sans-serif;
@@ -817,7 +850,9 @@ img { display: block; max-width: 100%; }
 }
 
 @media (min-width: 600px) {
-  .modal-bg { align-items: center; }
+  .modal-bg {
+    align-items: center;
+  }
 }
 
 .modal-bg.aberto {
@@ -844,7 +879,9 @@ img { display: block; max-width: 100%; }
   }
 }
 
-.modal-bg.aberto .modal { transform: translateY(0); }
+.modal-bg.aberto .modal {
+  transform: translateY(0);
+}
 
 .modal__alca {
   width: 40px;
@@ -854,7 +891,11 @@ img { display: block; max-width: 100%; }
   margin: 0 auto 20px;
 }
 
-@media (min-width: 600px) { .modal__alca { display: none; } }
+@media (min-width: 600px) {
+  .modal__alca {
+    display: none;
+  }
+}
 
 .modal__cabecalho {
   display: flex;
@@ -868,6 +909,7 @@ img { display: block; max-width: 100%; }
   height: 58px;
   border-radius: 12px;
   object-fit: cover;
+  object-position: center;
   border: 2px solid var(--dourado);
   flex-shrink: 0;
 }
@@ -910,7 +952,9 @@ img { display: block; max-width: 100%; }
   margin-bottom: 14px;
 }
 
-.form-row .form-grupo { margin-bottom: 0; }
+.form-row .form-grupo {
+  margin-bottom: 0;
+}
 
 .form-grupo label {
   font-size: 12px;
@@ -943,7 +987,10 @@ img { display: block; max-width: 100%; }
   background: #fff;
 }
 
-.form-grupo textarea { resize: vertical; min-height: 80px; }
+.form-grupo textarea {
+  resize: vertical;
+  min-height: 80px;
+}
 
 .aviso-horarios {
   background: #F9F6EF;
@@ -956,7 +1003,9 @@ img { display: block; max-width: 100%; }
   margin-bottom: 16px;
 }
 
-.aviso-horarios strong { color: var(--marrom); }
+.aviso-horarios strong {
+  color: var(--marrom);
+}
 
 .preview-msg {
   background: #F0F9F0;
@@ -1039,7 +1088,9 @@ img { display: block; max-width: 100%; }
   box-shadow: 0 -4px 24px rgba(0,0,0,.25);
 }
 
-.float-bar.visivel { transform: translateY(0); }
+.float-bar.visivel {
+  transform: translateY(0);
+}
 
 .float-bar__info {
   flex: 1;
@@ -1079,7 +1130,9 @@ img { display: block; max-width: 100%; }
   flex-shrink: 0;
 }
 
-.float-bar__btn:hover { background: var(--dourado-claro); }
+.float-bar__btn:hover {
+  background: var(--dourado-claro);
+}
 
 /* ═══════════════════════════════════════════════════════════════
    TOAST
@@ -1128,6 +1181,7 @@ img { display: block; max-width: 100%; }
   height: 90px;
   border-radius: 16px;
   object-fit: cover;
+  object-position: center;
   border: 2px solid var(--dourado);
   margin: 0 auto 14px;
 }
@@ -1181,7 +1235,7 @@ img { display: block; max-width: 100%; }
   }
 
   .card__thumb {
-    height: 130px;
+    height: 165px;
   }
 }
 
@@ -1191,11 +1245,22 @@ img { display: block; max-width: 100%; }
     gap: 10px;
   }
 
-  .card__thumb { height: 110px; font-size: 40px; }
-  .card__nome  { font-size: 14px; }
-  .card__preco { font-size: 17px; }
+  .card__thumb {
+    height: 125px;
+    font-size: 40px;
+  }
 
-  .btn-header-cart__txt { display: none; }
+  .card__nome {
+    font-size: 14px;
+  }
+
+  .card__preco {
+    font-size: 17px;
+  }
+
+  .btn-header-cart__txt {
+    display: none;
+  }
 
   .float-bar {
     padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
@@ -1239,6 +1304,10 @@ img { display: block; max-width: 100%; }
     padding: 12px;
   }
 
+  .card__thumb {
+    height: 118px;
+  }
+
   .card__acoes {
     margin-top: 8px;
   }
@@ -1276,7 +1345,7 @@ img { display: block; max-width: 100%; }
   }
 
   .card__thumb {
-    height: 100px;
+    height: 108px;
   }
 
   .card__nome {
@@ -1337,6 +1406,10 @@ img { display: block; max-width: 100%; }
     grid-template-columns: 1fr;
   }
 
+  .card__thumb {
+    height: 165px;
+  }
+
   .hero__logo {
     width: 120px;
     height: 120px;
@@ -1356,12 +1429,17 @@ img { display: block; max-width: 100%; }
   }
 }
 
-/* Animação */
+/* ═══════════════════════════════════════════════════════════════
+   ANIMAÇÃO
+   ═══════════════════════════════════════════════════════════════ */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
 
-.card {
-  animation: fadeUp .35s ease both;
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
