@@ -1443,3 +1443,31 @@ img {
     transform: translateY(0);
   }
 }
+.controle__input {
+  width: 62px;
+  height: 34px;
+  border: 2px solid var(--borda);
+  border-radius: 10px;
+  background: #fff;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--marrom);
+  outline: none;
+  transition: border .15s, box-shadow .15s;
+}
+
+.controle__input:focus {
+  border-color: var(--dourado);
+  box-shadow: 0 0 0 3px rgba(212, 146, 10, .15);
+}
+
+.controle__input::-webkit-outer-spin-button,
+.controle__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.controle__input[type=number] {
+  -moz-appearance: textfield;
+}
