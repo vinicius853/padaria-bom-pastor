@@ -6,7 +6,8 @@
   ║  • campo digitável em TODOS os produtos                       ║
   ║  • mínimo de 50 nos pães de sal                               ║
   ║  • botão + e - funcionando                                    ║
-  ║  • manter carrinho, WhatsApp e checkout                       ║
+  ║  • modal de finalização                                       ║
+  ║  • WhatsApp em formato limpo para impressão 80mm              ║
   ╚═══════════════════════════════════════════════════════════════╝
 */
 
@@ -21,8 +22,7 @@ const produtos = [
     cat: "paes",
     emoji: "🥖",
     unid: "pacote",
-    foto: "cachorro.jpeg",
-    fotoPos: "center"
+    foto: "cachorro.jpeg"
   },
   {
     id: 2,
@@ -32,8 +32,7 @@ const produtos = [
     cat: "paes",
     emoji: "🍔",
     unid: "pacote",
-    foto: "hamburguer.jpeg",
-    fotoPos: "center"
+    foto: "hamburguer.jpeg"
   },
   {
     id: 3,
@@ -43,44 +42,39 @@ const produtos = [
     cat: "paes",
     emoji: "🌭",
     unid: "pacote",
-    foto: "hotdog.jpeg",
-    fotoPos: "center"
+    foto: "hotdog.jpeg"
   },
   {
     id: 4,
     nome: "Mini Pão de Sal",
-    desc: "Pedido mínimo de 50 unidades. Ideal para eventos e cafés. Pedir com 24h de antecedência.",
+    desc: "Pedido mínimo de 50 unidades.",
     preco: 0.70,
     cat: "paes",
     emoji: "🥐",
     unid: "unidade",
     qtdMinima: 50,
-    antecedencia: true,
-    foto: "mini.png",
-    fotoPos: "center"
+    foto: "mini.png"
   },
   {
     id: 5,
     nome: "Pão de Sal Tradicional",
-    desc: "Pedido mínimo de 50 unidades. Fresquinho e crocante.",
+    desc: "Pedido mínimo de 50 unidades.",
     preco: 0.90,
     cat: "paes",
     emoji: "🍞",
     unid: "unidade",
     qtdMinima: 50,
-    foto: "pao-sal.jpeg",
-    fotoPos: "center"
+    foto: "pao-sal.jpeg"
   },
   {
     id: 10,
     nome: "Rosca Salgada",
-    desc: "Rosca salgada recheada com presunto, queijo e maionese.",
+    desc: "Rosca salgada recheada.",
     preco: 19.00,
     cat: "paes",
     emoji: "🥨",
     unid: "unidade",
-    foto: "rosca.jpeg",
-    fotoPos: "center"
+    foto: "rosca.jpeg"
   },
   {
     id: 6,
@@ -90,8 +84,7 @@ const produtos = [
     cat: "bolos",
     emoji: "🎂",
     unid: "unidade",
-    foto: "torta.jpeg",
-    fotoPos: "center"
+    foto: "torta.jpeg"
   },
   {
     id: 8,
@@ -101,9 +94,7 @@ const produtos = [
     cat: "doces",
     emoji: "🍮",
     unid: "unidade",
-    antecedencia: true,
-    foto: "pudim.jpeg",
-    fotoPos: "center"
+    foto: "pudim.jpeg"
   },
   {
     id: 9,
@@ -113,9 +104,7 @@ const produtos = [
     cat: "doces",
     emoji: "🍮",
     unid: "unidade",
-    antecedencia: true,
-    foto: "pudim2.jpeg",
-    fotoPos: "center"
+    foto: "pudim2.jpeg"
   }
 ];
 
@@ -159,6 +148,8 @@ function getLabelUnidade(unid) {
 
 function renderizarProdutos() {
   const grid = document.getElementById("produtosGrid");
+
+  if (!grid) return;
 
   const lista = catAtual === "todos"
     ? produtos
@@ -231,21 +222,15 @@ function gerarControleQuantidade(p, qty) {
 function gerarCardHtml(p) {
   const qty = carrinho[p.id] || 0;
 
-  const thumbHtml = p.foto
-    ? `
-      <img
-        src="${p.foto}"
-        alt="${p.nome}"
-        class="card__foto"
-      />
-    `
-    : `<span class="card__emoji">${p.emoji}</span>`;
-
   return `
     <div class="card">
 
       <div class="card__thumb">
-        ${thumbHtml}
+        <img
+          src="${p.foto}"
+          alt="${p.nome}"
+          class="card__foto"
+        />
       </div>
 
       <div class="card__body">
@@ -406,14 +391,14 @@ function atualizarUI() {
 
   document.getElementById("headerBadge").textContent = qty;
 
-  const floatBar = document.getElementById("floatBar");
-
   document.getElementById("fbQtd").textContent =
     `${qty} ${qty === 1 ? "item" : "itens"}`;
 
   document.getElementById("fbTotal").textContent = fmt(val);
 
-  floatBar.classList.toggle("visivel", qty > 0);
+  document
+    .getElementById("floatBar")
+    .classList.toggle("visivel", qty > 0);
 
   const body = document.getElementById("cartBody");
   const footer = document.getElementById("cartFooter");
@@ -506,6 +491,202 @@ function fecharCarrinho() {
   document.body.style.overflow = "";
 }
 
+function abrirModal() {
+  if (totalQuantidade() === 0) {
+    mostrarToast("Adicione algum produto ao pedido primeiro.");
+    return;
+  }
+
+  fecharCarrinho();
+
+  document
+    .getElementById("modalBg")
+    .classList.add("aberto");
+
+  document.body.style.overflow = "hidden";
+}
+
+function fecharModal() {
+  document
+    .getElementById("modalBg")
+    .classList.remove("aberto");
+
+  document.body.style.overflow = "";
+}
+
+function fecharModalFora(event) {
+  if (event.target.id === "modalBg") {
+    fecharModal();
+  }
+}
+
+function formatarDataBR(dataISO) {
+  if (!dataISO) return "";
+
+  const partes = dataISO.split("-");
+
+  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+function configurarDataMinima() {
+  const inputData = document.getElementById("inData");
+
+  if (!inputData) return;
+
+  const hoje = new Date();
+
+  inputData.min = hoje.toISOString().split("T")[0];
+}
+
+function gerarHorariosPorData(dataISO) {
+  const selectHora = document.getElementById("inHora");
+
+  if (!selectHora) return;
+
+  selectHora.innerHTML = "";
+
+  if (!dataISO) {
+    selectHora.innerHTML =
+      `<option value="">Selecione a data</option>`;
+    return;
+  }
+
+  const data = new Date(`${dataISO}T00:00:00`);
+  const domingo = data.getDay() === 0;
+
+  const horaFim = domingo ? 12 : 21;
+
+  let html =
+    `<option value="">Selecione o horário</option>`;
+
+  for (let hora = 6; hora <= horaFim; hora++) {
+    html += `
+      <option value="${String(hora).padStart(2, "0")}:00">
+        ${String(hora).padStart(2, "0")}:00
+      </option>
+    `;
+  }
+
+  selectHora.innerHTML = html;
+}
+
+function mascararTelefone(valor) {
+  let numeros = valor.replace(/\D/g, "");
+
+  numeros = numeros.slice(0, 11);
+
+  if (numeros.length <= 10) {
+    return numeros
+      .replace(/^(\d{2})(\d)/, "($1) $2")
+      .replace(/(\d{4})(\d)/, "$1-$2");
+  }
+
+  return numeros
+    .replace(/^(\d{2})(\d)/, "($1) $2")
+    .replace(/(\d{5})(\d)/, "$1-$2");
+}
+
+function validarCamposPedido() {
+  const nome =
+    document.getElementById("inNome").value.trim();
+
+  const telefone =
+    document.getElementById("inTel").value.trim();
+
+  const data =
+    document.getElementById("inData").value;
+
+  const hora =
+    document.getElementById("inHora").value;
+
+  if (!nome || !telefone || !data || !hora) {
+    mostrarToast("Preencha todos os campos.");
+    return false;
+  }
+
+  return true;
+}
+
+function enviarWhatsApp() {
+
+  if (!validarCamposPedido()) return;
+
+  const nome =
+    document.getElementById("inNome").value.trim();
+
+  const telefone =
+    document.getElementById("inTel").value.trim();
+
+  const data =
+    document.getElementById("inData").value;
+
+  const hora =
+    document.getElementById("inHora").value;
+
+  const obs =
+    document.getElementById("inObs").value.trim();
+
+  const linhas = [];
+
+  linhas.push("PADARIA BOM PASTOR");
+  linhas.push("ENCOMENDA");
+  linhas.push("--------------------------------");
+  linhas.push("");
+
+  linhas.push("CLIENTE:");
+  linhas.push(nome);
+  linhas.push("");
+
+  linhas.push("WHATSAPP:");
+  linhas.push(telefone);
+  linhas.push("");
+
+  linhas.push("RETIRADA:");
+  linhas.push(`${formatarDataBR(data)} - ${hora}`);
+  linhas.push("");
+
+  linhas.push("--------------------------------");
+  linhas.push("ITENS DO PEDIDO");
+  linhas.push("--------------------------------");
+
+  Object.keys(carrinho).forEach(id => {
+
+    const p = buscarProduto(id);
+
+    if (!p) return;
+
+    const quantidade = carrinho[id];
+    const subtotal = p.preco * quantidade;
+
+    linhas.push(`${quantidade}x ${p.nome}`);
+    linhas.push(`Unit.: ${fmt(p.preco)}`);
+    linhas.push(`Subtotal: ${fmt(subtotal)}`);
+    linhas.push("");
+  });
+
+  linhas.push("--------------------------------");
+  linhas.push(`TOTAL: ${fmt(totalValor())}`);
+  linhas.push("--------------------------------");
+
+  if (obs) {
+    linhas.push("");
+    linhas.push("OBSERVACOES:");
+    linhas.push(obs);
+    linhas.push("--------------------------------");
+  }
+
+  linhas.push("");
+  linhas.push("Retirada no local.");
+  linhas.push("Por favor, confirme a disponibilidade.");
+
+  const mensagem = linhas.join("\n");
+
+  const url =
+    `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensagem)}`;
+
+  window.open(url, "_blank");
+}
+
 function mostrarToast(mensagem) {
   const el = document.getElementById("toast");
 
@@ -534,5 +715,29 @@ document.querySelectorAll(".cat-btn").forEach(btn => {
   });
 });
 
+document
+  .getElementById("inData")
+  ?.addEventListener("change", e => {
+    gerarHorariosPorData(e.target.value);
+  });
+
+document
+  .getElementById("inTel")
+  ?.addEventListener("input", e => {
+    e.target.value = mascararTelefone(e.target.value);
+  });
+
+window.mudaQuantidade = mudaQuantidade;
+window.alterarQuantidadeManual = alterarQuantidadeManual;
+window.validarQuantidadeManual = validarQuantidadeManual;
+window.removerItem = removerItem;
+window.abrirCarrinho = abrirCarrinho;
+window.fecharCarrinho = fecharCarrinho;
+window.abrirModal = abrirModal;
+window.fecharModal = fecharModal;
+window.fecharModalFora = fecharModalFora;
+window.enviarWhatsApp = enviarWhatsApp;
+
+configurarDataMinima();
 renderizarProdutos();
 atualizarUI();
